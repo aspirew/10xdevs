@@ -103,6 +103,7 @@ Originally captured: a notification when another member's availability overlaps 
 
 - **Privacy commitment.** A group's membership and its members' availability are visible only to members of that group. The product does not expose this data outside the group via search, public profile, or any other surface.
 - **Mobile-first usability.** The shared calendar — including marking availability, viewing overlap counts, and confirming a session — is usable on a phone-sized screen.
+- **Progressive Web App.** GameSlot ships as a PWA: installable to a phone's home screen, with a registered service worker. The service worker is the prerequisite for FR-012's push-notification delivery path; installability is what makes GameSlot feel app-like rather than tab-like for a friend group that returns to it weekly. v1 does not require offline write capability — availability marking and session confirmation may require connectivity. Offline read of the most recent calendar state is a nice-to-have, not a must-have.
 
 ## Business Logic
 

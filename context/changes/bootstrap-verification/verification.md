@@ -1,19 +1,19 @@
 ---
-bootstrapped_at: 2026-05-20T23:39:00Z
+bootstrapped_at: 2026-05-21T22:19:00Z
 starter_id: 10x-astro-starter
-starter_name: "10x Astro Starter (Astro + Supabase + Cloudflare)"
+starter_name: 10x Astro Starter (Astro + Supabase + Cloudflare)
 project_name: game-slot
 language_family: js
 package_manager: npm
 cwd_strategy: git-clone
 bootstrapper_confidence: first-class
 phase_3_status: ok
-audit_command: "npm audit --json"
+audit_command: npm audit --json
 ---
 
 ## Hand-off
 
-Verbatim copy of `context/foundation/tech-stack.md`:
+Hand-off frontmatter (verbatim from `context/foundation/tech-stack.md`):
 
 ```yaml
 starter_id: 10x-astro-starter
@@ -22,7 +22,7 @@ project_name: game-slot
 hints:
   language_family: js
   team_size: solo
-  deployment_target: cloudflare-pages
+  deployment_target: vercel
   ci_provider: github-actions
   ci_default_flow: auto-deploy-on-merge
   bootstrapper_confidence: first-class
@@ -36,107 +36,115 @@ hints:
   has_background_jobs: false
 ```
 
-### Why this stack
+Why-this-stack paragraph (verbatim):
 
-Solo host shipping a small-group board-game scheduler in a 3-week MVP window
-with a hard 2026-06-10 deadline. The recommended default for `(web, js)` —
-10x Astro Starter — clears all four agent-friendly gates and packages the
-exact concerns GameSlot's PRD names: third-party single sign-on (FR-001) and
-Postgres-backed groups/availability via Supabase, mobile-first shared
-calendar via Astro+React+Tailwind, and edge deploy via Cloudflare Pages.
-Push notifications on session confirm (FR-012) are request-time, so no
-background-jobs flag; realtime updates aren't named in any FR, so polling
-the calendar suffices. The user added PWA as an explicit constraint —
-patched in via `@vite-pwa/astro`, which also satisfies the service-worker
-prerequisite for web push. CI on GitHub Actions with auto-deploy-on-merge
-is the starter's standard shape. Bootstrapper confidence is first-class
-(CLI registered, expected to work but not battle-tested), so scaffolding
-will be mostly smooth with occasional manual steps.
+> Solo host shipping a small-group board-game scheduler in a 3-week MVP window
+> with a hard 2026-06-10 deadline. The recommended default for `(web, js)` —
+> 10x Astro Starter — clears all four agent-friendly gates and packages the
+> exact concerns GameSlot's PRD names: third-party single sign-on (FR-001),
+> Postgres-backed groups/availability via Supabase, mobile-first shared
+> calendar via Astro+React+Tailwind, and the service-worker prerequisite for
+> FR-012 push notifications via the PWA non-functional requirement (now
+> explicit in the PRD; installable + service worker, offline-write deferred).
+> Deployment is Vercel (serverless Node runtime), chosen by
+> `/10x-infra-research` after a three-lens anti-bias cross-check that
+> surfaced Astro 5 + `@supabase/ssr` + Workers friction on the original
+> Cloudflare pick — so this hand-off overrides the starter's Cloudflare-
+> flavored default. The first post-scaffold tasks are therefore: (1) swap
+> `@astrojs/cloudflare` for `@astrojs/vercel@10`, (2) pin `astro@5.x`, and
+> (3) install `@vite-pwa/astro` for the service-worker/PWA wiring. CI on
+> GitHub Actions with auto-deploy-on-merge (Vercel's GitHub integration
+> handles the deploy trigger natively — no workflow file needed for the
+> deploy itself). Bootstrapper confidence is first-class: scaffolding works
+> end-to-end but the adapter swap and PWA wiring are named manual steps.
+> See `context/foundation/infrastructure.md` for the full deployment
+> decision, operational story, and risk register.
 
 ## Pre-scaffold verification
 
-| Signal       | Value                                                         | Severity | Notes                                                                |
-| ------------ | ------------------------------------------------------------- | -------- | -------------------------------------------------------------------- |
-| npm package  | not run                                                       | n/a      | cmd_template starts with `git clone`; no npm CLI to version-check    |
-| GitHub repo  | przeprogramowani/10x-astro-starter last pushed 2026-05-17     | fresh    | from card.docs_url (3 days before bootstrap; within 3-month window)  |
+| Signal       | Value                                                          | Severity | Notes                                                                  |
+| ------------ | -------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| npm package  | not run                                                        | n/a      | cmd_template starts with `git clone`; no npm CLI to query              |
+| GitHub repo  | przeprogramowani/10x-astro-starter last pushed 2026-05-17       | fresh    | from card.docs_url; checked via curl fallback (gh CLI unavailable)     |
 
 ## Scaffold log
 
 **Resolved invocation**: `git clone https://github.com/przeprogramowani/10x-astro-starter .bootstrap-scaffold && cd .bootstrap-scaffold && npm install`
-**Strategy**: git-clone
-**Exit code**: 0
-**Files moved**: 20
-**Conflicts (.scaffold siblings)**: CLAUDE.md.scaffold
-**.gitignore handling**: moved silently (none pre-existing in cwd)
-**.bootstrap-scaffold cleanup**: deleted (and `.bootstrap-scaffold/.git/` removed before move-up, so no upstream history leaked)
+**Strategy**: git-clone (clone the starter repo without keeping its upstream history)
+**Exit code**: 0 (clone) + 0 (npm install)
+**npm install summary**: 774 packages added, 775 audited in 7s
+**npm install warnings**:
+- `EBADENGINE` — starter declares `node: ^20.19.0 || ^22.13.0 || >=24`; local Node is `v23.1.0` (between supported ranges). Informational; npm did not block.
+- Two deprecated transitive packages: `@babel/plugin-proposal-private-methods@7.18.6` (merged into ES standard), `node-domexception@1.0.0` (use native DOMException).
+**Files moved**: 0 net new files into cwd. The full file-by-file diff (`diff -qr .bootstrap-scaffold/ ./`) showed only one delta — `CLAUDE.md` differs because cwd's CLAUDE.md is the skill-dev augmented copy (13540B) while the starter ships a 3164B template. Cwd already had `CLAUDE.md.scaffold` from the May 20 bootstrap matching the freshly cloned `CLAUDE.md` byte-for-byte, so no new sibling was needed.
+**Conflicts (.scaffold siblings)**: none new this run. Pre-existing `CLAUDE.md.scaffold` (3164B, from May 20) verified to match the fresh starter's CLAUDE.md.
+**.gitignore handling**: identical in scaffold and cwd (both 299B, byte-for-byte match) — no append-merge needed.
+**.bootstrap-scaffold cleanup**: deleted.
 
-Notes:
-
-- The cwd carried a prior `.bootstrap-scaffold/` directory and a prior `verification.md` (`phase_3_status: failed`, 2026-05-20T23:32Z, npm cache EACCES). The user fixed `~/.npm` ownership before re-invoking; the prior `.bootstrap-scaffold/` was wiped with explicit user confirmation.
-- npm install completed with engine warnings: starter's transitive `@eslint/*` packages require Node `^20.19.0 || ^22.13.0 || >=24`; the user is on Node 23.1.0. Warnings only — no install failure. Consider switching to Node 22 LTS or Node 24 to silence them.
+**Deliberate user-authorized deviation from the strict conflict matrix**: before move-up, the user opted to skip `node_modules/` (which the cmd_template's `npm install` produced inside `.bootstrap-scaffold/`) to avoid ~500MB of byte-identical duplicates getting renamed to `.scaffold` siblings across thousands of dependency files. `.git/` was also deleted before move-up per the git-clone strategy spec. The remaining source/config files were diffed; identical files left alone, no merge step was needed. This deviates from the spec's per-file conflict matrix but preserves the spec's intent (no data loss; surface real differences).
 
 ## Post-scaffold audit
 
 **Tool**: `npm audit --json`
-**Summary**: 0 CRITICAL, 1 HIGH, 10 MODERATE, 0 LOW
-**Direct vs transitive**: 0/0/3/0 direct of total 0/1/10/0
-
-#### CRITICAL findings
-
-None.
+**Summary**: 0 CRITICAL, 1 HIGH, 9 MODERATE, 0 LOW
+**Direct vs transitive**: 0/0/2/0 direct of total 0/1/9/0 — 2 direct (both moderate); 8 transitive (1 high, 7 moderate)
 
 #### HIGH findings
 
-- **`devalue`** (transitive) — Svelte devalue: DoS via sparse array deserialization. Reached through the Astro/Cloudflare/Vite chain.
+- **devalue** (transitive via `devalue` itself) — moderate-rated CVE escalated to "high" severity by npm's severity model. Pulled in via `@astrojs/cloudflare` → `wrangler` → downstream Cloudflare tooling chain. Likely removed when `@astrojs/cloudflare` is swapped for `@astrojs/vercel` per `infrastructure.md`. Resolution before adapter swap: `npm audit fix` (may force a breaking-changes prompt).
 
 #### MODERATE findings
 
-Direct (3):
+Direct:
+- **@astrojs/check** — pulled via `@astrojs/language-server`. Type-checking tool; will remain a direct dep regardless of platform.
+- **wrangler** — pulled via `miniflare`. Cloudflare-specific; expected to be removed during the planned `@astrojs/cloudflare` → `@astrojs/vercel@10` adapter swap. This single removal should resolve several of the transitive findings below.
 
-- **`@astrojs/check`** — vulnerable via `@astrojs/language-server`.
-- **`@astrojs/cloudflare`** — vulnerable via `@cloudflare/vite-plugin` and `wrangler`.
-- **`wrangler`** — vulnerable via `miniflare`.
-
-Transitive (7):
-
-- `@astrojs/language-server` — via `volar-service-yaml`.
-- `@cloudflare/vite-plugin` — via `miniflare` and `wrangler`.
-- `miniflare` — via `ws`.
-- `volar-service-yaml` — via `yaml-language-server`.
-- `ws` — uninitialized memory disclosure.
-- `yaml` — stack overflow via deeply nested YAML collections.
-- `yaml-language-server` — via `yaml`.
+Transitive (resolved by upstream package bumps or by removing the Cloudflare chain entirely):
+- `@astrojs/language-server` (via `volar-service-yaml`)
+- `@cloudflare/vite-plugin` (via `miniflare`, `wrangler`, `ws`) — will go away with adapter swap
+- `miniflare` (via `ws`) — same
+- `volar-service-yaml` (via `yaml-language-server`)
+- `ws` (via `ws`) — same
+- `yaml` (via `yaml`)
+- `yaml-language-server` (via `yaml`)
 
 #### LOW / INFO findings
 
 None.
 
-Raw `npm audit --json` output captured (6.7 KB, 285 lines) and consulted to build the breakdown above. Run `npm audit` from project root to regenerate the latest view; `npm audit fix` may resolve a subset without breaking changes.
-
 ## Hints recorded but not acted on
 
-| Hint                       | Value                  |
-| -------------------------- | ---------------------- |
-| bootstrapper_confidence    | first-class            |
-| quality_override           | false                  |
-| path_taken                 | standard               |
-| self_check_answers         | null                   |
-| team_size                  | solo                   |
-| deployment_target          | cloudflare-pages       |
-| ci_provider                | github-actions         |
-| ci_default_flow            | auto-deploy-on-merge   |
-| has_auth                   | true                   |
-| has_payments               | false                  |
-| has_realtime               | false                  |
-| has_ai                     | false                  |
-| has_background_jobs        | false                  |
+| Hint                       | Value                              |
+| -------------------------- | ---------------------------------- |
+| bootstrapper_confidence    | first-class                        |
+| quality_override           | false                              |
+| path_taken                 | standard                           |
+| self_check_answers         | null                               |
+| team_size                  | solo                               |
+| deployment_target          | vercel                             |
+| ci_provider                | github-actions                     |
+| ci_default_flow            | auto-deploy-on-merge               |
+| has_auth                   | true                               |
+| has_payments               | false                              |
+| has_realtime               | false                              |
+| has_ai                     | false                              |
+| has_background_jobs        | false                              |
 
 ## Next steps
 
 Next: a future skill will set up agent context (CLAUDE.md, AGENTS.md). For now, your project is scaffolded and verified — happy hacking.
 
 Useful manual steps in the meantime:
-- `git init` (if you have not already) to start your own repo history.
-- Review `CLAUDE.md.scaffold` and decide whether to merge it into your existing `CLAUDE.md` (the scaffold ships starter-specific agent guidance; the existing file carries lesson instructions).
-- Consider aligning Node to 22 LTS or 24 (current: 23.1.0) to silence the `@eslint/*` engine warnings.
-- Address audit findings per your project's risk tolerance — the full breakdown is in this log; `npm audit fix` resolves the non-breaking subset, and the 1 HIGH (`devalue`) is transitive and waits on upstream.
+- `git init` (if you have not already) to start your own repo history. (This cwd already has a `.git/` from the dev environment.)
+- Review any `.scaffold` siblings the conflict policy created and decide which version of each file to keep. (This run created none; only the pre-existing `CLAUDE.md.scaffold` from May 20 remains, and it has been verified to still match the upstream starter's CLAUDE.md.)
+- Address audit findings per your project's risk tolerance — the full breakdown is above. The single HIGH (`devalue`) and several transitive MODERATEs are expected to clear once `@astrojs/cloudflare` is swapped for `@astrojs/vercel@10` (planned in `context/foundation/infrastructure.md`).
+- Project-specific post-scaffold work named in `tech-stack.md` / `infrastructure.md`:
+  1. `npm rm @astrojs/cloudflare && npm i @astrojs/vercel@10` (adapter swap).
+  2. Pin `astro@5.x` in `package.json` to avoid picking up Astro 6 beta.
+  3. `npm i @vite-pwa/astro` and wire the service worker for FR-012 push notifications.
+  4. Run `vercel link` once and install the Supabase Vercel integration via the dashboard.
+
+## Environment notes
+
+- Node version at scaffold time: `v23.1.0` (npm `10.9.0`). Starter's declared engine range is `node: ^20.19.0 || ^22.13.0 || >=24`. Node 23.x is outside the supported ranges — npm issued an `EBADENGINE` warning but did not block. Recommendation: align local Node to one of the supported ranges (`nvm install 22.13` or `nvm install 24`) before doing serious dev work; `.nvmrc` from the starter pins the intended version.
+- `gh` CLI unavailable in this environment; pre-scaffold GitHub recency check used `curl` fallback against the public API (anonymous; rate-limited but sufficient for one read).
