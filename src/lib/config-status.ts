@@ -1,4 +1,4 @@
-import { SUPABASE_URL, SUPABASE_KEY } from "astro:env/server";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "astro:env/server";
 
 export interface ConfigStatus {
   name: string;
@@ -11,7 +11,7 @@ export interface ConfigStatus {
 export const configStatuses: ConfigStatus[] = [
   {
     name: "Supabase",
-    configured: Boolean(SUPABASE_URL && SUPABASE_KEY),
+    configured: Boolean(SUPABASE_URL && SUPABASE_ANON_KEY),
     message: "Supabase nie jest skonfigurowany — funkcje uwierzytelniania są wyłączone.",
     docsUrl: "https://github.com/przeprogramowani/10x-astro-starter#supabase-configuration",
     docsLabel: "Zobacz instrukcję konfiguracji",

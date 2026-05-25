@@ -4,7 +4,7 @@ authored_at: 2026-05-25
 source: context/foundation/infrastructure.md
 scope: vercel-integration + first-prod-deploy
 out_of_scope: pwa, web-push, custom-domain, vercel-mcp
-status: phase-1-complete
+status: phase-2-code-ready
 ---
 
 ## Purpose
@@ -43,10 +43,10 @@ Operationalize `context/foundation/infrastructure.md` into a sequenced, auditabl
 
 ## Phase 2 — Supabase ↔ Vercel wiring *(FR-001 auth path)*
 
-7. Install Supabase Vercel integration via Vercel dashboard (Marketplace → Supabase → Connect). Auto-syncs `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` and registers the redirect-URI webhook.
-8. Reconcile env-var names: `.env.example` and `astro.config.mjs` `envField` schema currently use `SUPABASE_KEY`; the integration writes `SUPABASE_ANON_KEY`. Rename locally to match the integration's canonical names so prod and local agree. Update `ci.yml` secrets in the same pass.
-9. Add `[auth.external.google]` block to `supabase/config.toml` (enabled, `client_id`/`secret` via `env()`).
-10. Create Google Cloud OAuth client; paste credentials into Supabase Studio → Authentication → Providers → Google; add the Supabase callback URL to the Google client's allowed redirect list.
+7. ⏳ Install Supabase Vercel integration via Vercel dashboard (Marketplace → Supabase → Connect). Auto-syncs `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` and registers the redirect-URI webhook. **Human-only.**
+8. ✅ Reconciled env-var names: renamed `SUPABASE_KEY` → `SUPABASE_ANON_KEY` and added `SUPABASE_SERVICE_ROLE_KEY` across `.env.example`, `astro.config.mjs` envField schema, `.github/workflows/ci.yml` secret refs, and starter code (`src/lib/supabase.ts`, `src/lib/config-status.ts`). Build verified green.
+9. ✅ Added `[auth.external.google]` block to `supabase/config.toml` (enabled, `client_id`/`secret` via `env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID/SECRET)`, `skip_nonce_check = true` for local-dev Google auth). Also corrected `site_url` and `additional_redirect_urls` from `127.0.0.1:3000` to `localhost:4321` to match Astro 6's default dev port (was a silent breakage waiting at the Phase 2 gate).
+10. ⏳ Create Google Cloud OAuth client; paste credentials into **Vercel env** (for prod), local `.env` (for `supabase start`), and **Supabase Studio** (hosted project → Authentication → Providers → Google). Add the Supabase callback URL (shown in Studio) to the Google client's allowed redirect URIs. **Human-only.**
 
 **Gate:** `supabase start` locally; sign-in flow completes against the new Google provider.
 
