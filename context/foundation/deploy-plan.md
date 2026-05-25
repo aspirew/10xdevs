@@ -4,7 +4,7 @@ authored_at: 2026-05-25
 source: context/foundation/infrastructure.md
 scope: vercel-integration + first-prod-deploy
 out_of_scope: pwa, web-push, custom-domain, vercel-mcp
-status: not-started
+status: phase-1-complete
 ---
 
 ## Purpose
@@ -31,11 +31,15 @@ Operationalize `context/foundation/infrastructure.md` into a sequenced, auditabl
 
 ## Phase 1 — Vercel platform link *(no app changes)*
 
-4. Install Vercel CLI: `npm i -g vercel` (local-machine action).
-5. `vercel link` interactively → creates `game-slot` project, writes `.vercel/project.json`.
-6. Confirm pinned versions are the known-green pair (`astro@6.3.1`, `@astrojs/vercel@10.0.7`); add a one-line note in `AGENTS.md` deferring `npm update` per risk register row 3.
+4. Install Vercel CLI: `npm i -g vercel` (local-machine action). ✅
+5. `vercel link` interactively → writes `.vercel/repo.json` (newer CLI schema; supersedes `project.json`). Actual linked project: `aspirew/10xdevs` (not `game-slot` — accepted Vercel's directory-default name; rename is cosmetic, deferred). GitHub repo `aspirew/10xdevs` auto-connected. ✅
+6. Pin `astro@6.3.1` and `@astrojs/vercel@10.0.7` exactly in `package.json` (drop `^`). Per-risk-register Node runtime alignment: pin Vercel project Node to **22.x** (matches `.nvmrc` + CI; Vercel default of 24.x is outside the tested pair). One-line `AGENTS.md` note deferred to Phase 4 step 15 to avoid duplication. ✅ (pin done; dashboard Node action: human-only)
 
-**Gate:** `.vercel/project.json` exists; `vercel whoami` succeeds.
+**Gate:** `.vercel/repo.json` exists; `vercel whoami` succeeds; `npm run build` produces `.vercel/output/`.
+
+**Deferred to Phase 3** (will only matter at deploy time):
+- Vercel "Framework Preset" reads as "Other" rather than "Astro" — functionally fine because the adapter emits Build Output API artifacts, but revisit if first prod deploy misbehaves (fix = add `vercel.json` with `"framework": "astro"`).
+- `[@astrojs/sitemap] requires the 'site' option` warning — fix in `astro.config.mjs` after Phase 3 returns the prod URL.
 
 ## Phase 2 — Supabase ↔ Vercel wiring *(FR-001 auth path)*
 
