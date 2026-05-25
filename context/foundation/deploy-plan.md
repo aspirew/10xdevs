@@ -4,7 +4,7 @@ authored_at: 2026-05-25
 source: context/foundation/infrastructure.md
 scope: vercel-integration + first-prod-deploy
 out_of_scope: pwa, web-push, custom-domain, vercel-mcp
-status: phase-2-code-ready
+status: phase-2-complete
 ---
 
 ## Purpose
@@ -43,12 +43,14 @@ Operationalize `context/foundation/infrastructure.md` into a sequenced, auditabl
 
 ## Phase 2 — Supabase ↔ Vercel wiring *(FR-001 auth path)*
 
-7. ⏳ Install Supabase Vercel integration via Vercel dashboard (Marketplace → Supabase → Connect). Auto-syncs `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` and registers the redirect-URI webhook. **Human-only.**
+7. ✅ Supabase Vercel integration installed and resource attached to the `10xdevs` project (via Storage tab → Connect Store, after team-level Marketplace install didn't auto-bind the per-project resource — recorded as Phase 2 tripwire below). Integration writes `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` plus extras (POSTGRES_*, JWT_SECRET, 2025-vintage `SUPABASE_SECRET_KEY`/`PUBLISHABLE_KEY`) to Production + Preview scopes; Development scope intentionally empty (local dev uses `supabase start`).
 8. ✅ Reconciled env-var names: renamed `SUPABASE_KEY` → `SUPABASE_ANON_KEY` and added `SUPABASE_SERVICE_ROLE_KEY` across `.env.example`, `astro.config.mjs` envField schema, `.github/workflows/ci.yml` secret refs, and starter code (`src/lib/supabase.ts`, `src/lib/config-status.ts`). Build verified green.
 9. ✅ Added `[auth.external.google]` block to `supabase/config.toml` (enabled, `client_id`/`secret` via `env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID/SECRET)`, `skip_nonce_check = true` for local-dev Google auth). Also corrected `site_url` and `additional_redirect_urls` from `127.0.0.1:3000` to `localhost:4321` to match Astro 6's default dev port (was a silent breakage waiting at the Phase 2 gate).
-10. ⏳ Create Google Cloud OAuth client; paste credentials into **Vercel env** (for prod), local `.env` (for `supabase start`), and **Supabase Studio** (hosted project → Authentication → Providers → Google). Add the Supabase callback URL (shown in Studio) to the Google client's allowed redirect URIs. **Human-only.**
+10. ⏸️ **Deferred to FR-001.** Google Cloud OAuth client creation + paste credentials into Vercel env (`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`/`_SECRET`), local `.env`, and hosted Supabase Studio (Authentication → Providers → Google). Reason: the starter ships email/password auth only — there is no `signInWithOAuth` call or OAuth callback handler in `src/pages/api/auth/` yet, so Google credentials cannot be exercised end-to-end at this phase. FR-001 implementation will pair the credentials with the frontend wiring that consumes them.
 
-**Gate:** `supabase start` locally; sign-in flow completes against the new Google provider.
+**Gate (revised):** env vars present in Vercel for Production + Preview; `[auth.external.google]` ready for `env()` substitution; `npm run build` green. End-to-end Google sign-in test moves to FR-001's verification.
+
+**Phase 2 tripwire (for AGENTS.md / future projects):** The Supabase Vercel integration has a two-step install — adding it from the Vercel Marketplace authorizes Supabase at the **team scope** but does NOT auto-bind a Supabase project to a specific Vercel project. The project-level resource attachment happens in the Vercel project's **Storage** tab → "Connect Store" → Supabase → pick existing project. If `vercel env ls` shows no env vars after the Marketplace install, the second step was missed.
 
 ## Phase 3 — First production deploy
 
