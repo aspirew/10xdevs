@@ -33,7 +33,7 @@ Operationalize `context/foundation/infrastructure.md` into a sequenced, auditabl
 
 4. Install Vercel CLI: `npm i -g vercel` (local-machine action). ✅
 5. `vercel link` interactively → writes `.vercel/repo.json` (newer CLI schema; supersedes `project.json`). Actual linked project: `aspirew/10xdevs` (not `game-slot` — accepted Vercel's directory-default name; rename is cosmetic, deferred). GitHub repo `aspirew/10xdevs` auto-connected. ✅
-6. Pin `astro@6.3.1` and `@astrojs/vercel@10.0.7` exactly in `package.json` (drop `^`). Per-risk-register Node runtime alignment: pin Vercel project Node to **22.x** (matches `.nvmrc` + CI; Vercel default of 24.x is outside the tested pair). One-line `AGENTS.md` note deferred to Phase 4 step 15 to avoid duplication. ✅ (pin done; dashboard Node action: human-only)
+6. Pin `astro@6.3.1` and `@astrojs/vercel@10.0.7` exactly in `package.json` (drop `^`) — narrow scope of risk-register row 3 (esbuild bug in [withastro/astro#16258](https://github.com/withastro/astro/issues/16258)). Node runtime alignment: standardize on **Node 24** (current LTS as of 2026-05; Vercel default; adapter-canonical runtime). Updated `.nvmrc` (22.14.0 → 24) and `.github/workflows/ci.yml` (node-version: 22 → 24). One-line `AGENTS.md` note deferred to Phase 4 step 15 to avoid duplication. ✅
 
 **Gate:** `.vercel/repo.json` exists; `vercel whoami` succeeds; `npm run build` produces `.vercel/output/`.
 
