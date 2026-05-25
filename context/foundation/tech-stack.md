@@ -22,23 +22,20 @@ hints:
 ## Why this stack
 
 Solo host shipping a small-group board-game scheduler in a 3-week MVP window
-with a hard 2026-06-10 deadline. The recommended default for `(web, js)` —
-10x Astro Starter — clears all four agent-friendly gates and packages the
-exact concerns GameSlot's PRD names: third-party single sign-on (FR-001),
-Postgres-backed groups/availability via Supabase, mobile-first shared
-calendar via Astro+React+Tailwind, and the service-worker prerequisite for
-FR-012 push notifications via the PWA non-functional requirement (now
-explicit in the PRD; installable + service worker, offline-write deferred).
-Deployment is Vercel (serverless Node runtime), chosen by
-`/10x-infra-research` after a three-lens anti-bias cross-check that
-surfaced Astro 5 + `@supabase/ssr` + Workers friction on the original
-Cloudflare pick — so this hand-off overrides the starter's Cloudflare-
-flavored default. The first post-scaffold tasks are therefore: (1) swap
-`@astrojs/cloudflare` for `@astrojs/vercel@10`, (2) pin `astro@5.x`, and
-(3) install `@vite-pwa/astro` for the service-worker/PWA wiring. CI on
-GitHub Actions with auto-deploy-on-merge (Vercel's GitHub integration
-handles the deploy trigger natively — no workflow file needed for the
-deploy itself). Bootstrapper confidence is first-class: scaffolding works
-end-to-end but the adapter swap and PWA wiring are named manual steps.
-See `context/foundation/infrastructure.md` for the full deployment
-decision, operational story, and risk register.
+with a hard 2026-06-10 deadline. Standard path: `10x-astro-starter` is the
+recommended default for `(web-app, js)` and clears all four agent-friendly
+gates — Astro 6 + React 19 + TypeScript + Tailwind 4 + Supabase covers
+third-party SSO (FR-001), Postgres-backed groups/availability, and the
+mobile-first shared calendar in one opinionated package. Deployment is Vercel,
+locked by the prior `/10x-infra-research` after a three-lens anti-bias review
+that flagged Astro + `@supabase/ssr` + Workers friction on the starter's
+default Cloudflare path; the Supabase Vercel integration auto-syncs OAuth
+redirect URIs across previews, eliminating the single largest SSR-auth pain
+point. CI runs on GitHub Actions with auto-deploy-on-merge (Vercel's GitHub
+integration handles the deploy step natively). Bootstrapper confidence is
+first-class. Known manual post-scaffold work, documented in
+`infrastructure.md`: swap `@astrojs/cloudflare` for `@astrojs/vercel@10`,
+configure Supabase Google OAuth (FR-001), and install `@vite-pwa/astro` plus
+Web Push (VAPID) for the PWA NFR and FR-012 push notifications — no js
+starter in the registry covers PWA + Web Push first-class, so this is the
+documented manual line item.
