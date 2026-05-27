@@ -4,7 +4,7 @@ authored_at: 2026-05-25
 source: context/foundation/infrastructure.md
 scope: vercel-integration + first-prod-deploy
 out_of_scope: pwa, web-push, custom-domain, vercel-mcp
-status: phase-2-complete
+status: phase-3-complete
 ---
 
 ## Purpose
@@ -54,12 +54,16 @@ Operationalize `context/foundation/infrastructure.md` into a sequenced, auditabl
 
 ## Phase 3 — First production deploy
 
-11. `vercel --prod` → returns prod URL.
-12. Smoke test on prod: Google sign-in round-trip works.
-13. Open a throwaway PR; smoke test on its preview URL — this validates the redirect-URI auto-sync (the single risk that made Vercel the recommendation over Cloudflare).
-14. Tag the deploy: `git tag prod-2026-05-25-1 && git push --tags` — mitigates Hobby's one-step rollback ceiling.
+11. ✅ `vercel --prod` → returned prod URL. Deployment `dpl_C5ijbXZ72k1XocWYPiQDQGLTShQk` at `https://10xdevs-piq3f93d5-aspirew.vercel.app`, aliased to `https://10xdevs-lilac.vercel.app`. Built on Vercel in 24s.
+12. ✅ **Smoke test scope revised to match Phase 2 step 10 deferral:** Google sign-in round-trip moves to FR-001 (no `signInWithOAuth` call ships in the starter). What was verified on prod instead: `/` → 200, `/auth/signin` → 200, `/dashboard` → 302 → `/auth/signin` (proves auth middleware + Supabase client are wired at runtime against hosted env vars). Manual email/password browser round-trip can be exercised at any time; not gated on this phase.
+13. ✅ Opened throwaway PR #1 (`chore/sitemap-site-url`) — addressed the Phase 1 deferred `site` option so the validation PR also clears the `[@astrojs/sitemap] requires the 'site' option` warning. Preview built and Ready in 22s (`https://10xdevs-ceef9bapl-aspirew.vercel.app`). Preview returns 401 to anonymous curl because Vercel **Deployment Protection** gates preview URLs behind Vercel login by default — that's the expected state, not a failure. Squash-merged after smoke. **Redirect-URI auto-sync for preview-scoped OAuth callbacks is not exercised yet** — that validation moves to FR-001 with the rest of OAuth wiring.
+14. ✅ Tagged two rollback targets: `prod-2026-05-27-1` at commit `839c8c3` (first CLI-driven prod deploy) and `prod-2026-05-27-2` at commit `0fdcd6f` (post-merge prod with sitemap-index.xml live). Both pushed.
 
-**Gate:** prod URL serves the app; auth works on prod **and** on a preview.
+**Gate (revised):** prod URL serves the app **and** auth middleware behaves correctly under anonymous requests (verified by 302). End-to-end OAuth verification across prod + preview moves to FR-001.
+
+**Phase 3 tripwires (for future projects):**
+- Vercel preview URLs are gated by Deployment Protection by default; expect 401 on anonymous `curl`. Smoke-testing previews from a script requires either disabling protection or passing a bypass token (`vercel-protection-bypass` header). Visual verification in a logged-in browser is the simplest path.
+- A `vercel --prod` from local + a later `git push origin main` of the same code produces two prod deploys (one CLI-driven, one GitHub-driven). They're functionally identical but each counts against build minutes. To avoid: push to GitHub first and let the integration deploy, OR keep doing CLI-driven prods and accept the extra GitHub auto-deploy on the next push.
 
 ## Phase 4 — Document tripwires *(paper trail only)*
 
