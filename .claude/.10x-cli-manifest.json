@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.6.1",
   "manifestVersion": 2,
-  "lastApplied": "2026-05-25T18:14:46.705Z",
-  "lessonId": "m2l1",
+  "lastApplied": "2026-05-27T18:23:15.368Z",
+  "lessonId": "m2l2",
   "course": "10xdevs3",
   "tool": "claude-code",
   "files": {
@@ -84,9 +84,37 @@
         "files": [
           "SKILL.md"
         ]
+      },
+      "10x-new": {
+        "files": [
+          "SKILL.md"
+        ]
+      },
+      "10x-plan": {
+        "files": [
+          "references/progress-format.md",
+          "SKILL.md"
+        ]
+      },
+      "10x-plan-review": {
+        "files": [
+          "SKILL.md"
+        ]
+      },
+      "10x-implement": {
+        "files": [
+          "SKILL.md"
+        ]
+      },
+      "10x-archive": {
+        "files": [
+          "SKILL.md"
+        ]
       }
     },
-    "prompts": [],
+    "prompts": [
+      "skill-explainer.md"
+    ],
     "configs": []
   }
 }
