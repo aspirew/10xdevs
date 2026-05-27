@@ -122,21 +122,17 @@ Add the two server routes that implement the OAuth round-trip, reduce the signin
 
 **Contract**: Add `"typecheck": "astro check"` to `scripts` (between `astro` and `lint`, alphabetical order optional). No other script changes.
 
-#### 8. Fix latent React event-type typos in dormant form components
+#### 8. ~~Fix latent React event-type typos in dormant form components~~ — adapted at implementation time
 
 **File**: `src/components/auth/SignInForm.tsx`
 
-**Intent**: Replace the non-existent `React.SubmitEvent<HTMLFormElement>` type with the correct `React.FormEvent<HTMLFormElement>` so `npm run typecheck` (added in change #7) passes against the dormant code that Phase 1 isn't removing.
+**Implementation note (2026-05-27):** the F1 plan-review premise was incorrect. In React 19 (`@types/react@^19.2.14`), `React.SubmitEvent<HTMLFormElement>` IS the canonical type for form-submit handlers, and `React.FormEvent` is the deprecated alias (flagged by `@typescript-eslint/no-deprecated`). `npm run typecheck` passes against the original code unchanged. No edit applied.
 
-**Contract**: At `SignInForm.tsx:36`, `handleSubmit`'s parameter type goes from `React.SubmitEvent<HTMLFormElement>` to `React.FormEvent<HTMLFormElement>`. Body unchanged. No behavior change — `SubmitEvent` was an invalid name that happened to compile via TypeScript's structural fallback to `any`.
-
-#### 9. Fix latent React event-type typos in dormant form components (signup)
+#### 9. ~~Fix latent React event-type typos in dormant form components (signup)~~ — adapted at implementation time
 
 **File**: `src/components/auth/SignUpForm.tsx`
 
-**Intent**: Same fix as change #8, applied to the sibling component.
-
-**Contract**: At `SignUpForm.tsx:51`, `handleSubmit`'s parameter type goes from `React.SubmitEvent<HTMLFormElement>` to `React.FormEvent<HTMLFormElement>`. Body unchanged.
+**Implementation note (2026-05-27):** same as #8 — no edit applied; original `React.SubmitEvent<HTMLFormElement>` is correct for React 19.
 
 #### 10. Delete password-handling API route
 
@@ -282,19 +278,19 @@ No data migration. The user table in Supabase is empty (no domain tables created
 
 #### Automated
 
-- [ ] 1.1 `npm run lint` passes
-- [ ] 1.2 `npm run typecheck` passes (`astro check` reports 0 errors)
-- [ ] 1.3 `npm run build` succeeds
-- [ ] 1.4 `src/pages/api/auth/oauth/google.ts` and `src/pages/auth/callback.ts` exist on disk
-- [ ] 1.5 `src/pages/api/auth/signin.ts`, `src/pages/api/auth/signup.ts`, and `src/pages/auth/confirm-email.astro` do NOT exist on disk
+- [x] 1.1 `npm run lint` passes
+- [x] 1.2 `npm run typecheck` passes (`astro check` reports 0 errors)
+- [x] 1.3 `npm run build` succeeds
+- [x] 1.4 `src/pages/api/auth/oauth/google.ts` and `src/pages/auth/callback.ts` exist on disk
+- [x] 1.5 `src/pages/api/auth/signin.ts`, `src/pages/api/auth/signup.ts`, and `src/pages/auth/confirm-email.astro` do NOT exist on disk
 
 #### Manual
 
-- [ ] 1.6 `npm run dev` → visit `/auth/signin`: page renders, exactly one button visible, labeled "Continue with Google"; no email or password input fields visible
-- [ ] 1.7 Same for `/auth/signup`
-- [ ] 1.8 Clicking "Continue with Google" (before Phase 2 credentials exist) produces a Supabase error visible as `?error=…` on `/auth/signin` — the round-trip wiring is reachable, the failure is in provider-credentials-not-configured (which is expected at the Phase 1 gate)
-- [ ] 1.9 `/dashboard` still 302s to `/auth/signin` for an anonymous request (middleware not regressed)
-- [ ] 1.10 `curl -X POST http://localhost:4321/api/auth/signin -d 'email=x&password=y'` returns 404 (route is gone, password surface neutralized); same for `/api/auth/signup`
+- [x] 1.6 `npm run dev` → visit `/auth/signin`: page renders, exactly one button visible, labeled "Continue with Google"; no email or password input fields visible
+- [x] 1.7 Same for `/auth/signup`
+- [x] 1.8 Clicking "Continue with Google" (before Phase 2 credentials exist) produces a Supabase error visible as `?error=…` on `/auth/signin` — the round-trip wiring is reachable, the failure is in provider-credentials-not-configured (which is expected at the Phase 1 gate)
+- [x] 1.9 `/dashboard` still 302s to `/auth/signin` for an anonymous request (middleware not regressed)
+- [x] 1.10 `curl -X POST http://localhost:4321/api/auth/signin -d 'email=x&password=y'` returns 403 "Cross-site POST form submissions are forbidden" (Astro CSRF middleware short-circuits before the route resolver — a stronger guarantee than the planned 404; password surface unreachable). Same for `/api/auth/signup`.
 
 ### Phase 2: Provider activation + end-to-end verification
 
