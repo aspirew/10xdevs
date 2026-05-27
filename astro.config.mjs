@@ -8,6 +8,7 @@ import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://10xdevs-lilac.vercel.app",
   output: "server",
   integrations: [react(), sitemap()],
   vite: {
