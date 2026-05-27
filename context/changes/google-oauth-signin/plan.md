@@ -278,31 +278,31 @@ No data migration. The user table in Supabase is empty (no domain tables created
 
 #### Automated
 
-- [x] 1.1 `npm run lint` passes
-- [x] 1.2 `npm run typecheck` passes (`astro check` reports 0 errors)
-- [x] 1.3 `npm run build` succeeds
-- [x] 1.4 `src/pages/api/auth/oauth/google.ts` and `src/pages/auth/callback.ts` exist on disk
-- [x] 1.5 `src/pages/api/auth/signin.ts`, `src/pages/api/auth/signup.ts`, and `src/pages/auth/confirm-email.astro` do NOT exist on disk
+- [x] 1.1 `npm run lint` passes — 98a65c5
+- [x] 1.2 `npm run typecheck` passes (`astro check` reports 0 errors) — 98a65c5
+- [x] 1.3 `npm run build` succeeds — 98a65c5
+- [x] 1.4 `src/pages/api/auth/oauth/google.ts` and `src/pages/auth/callback.ts` exist on disk — 98a65c5
+- [x] 1.5 `src/pages/api/auth/signin.ts`, `src/pages/api/auth/signup.ts`, and `src/pages/auth/confirm-email.astro` do NOT exist on disk — 98a65c5
 
 #### Manual
 
-- [x] 1.6 `npm run dev` → visit `/auth/signin`: page renders, exactly one button visible, labeled "Continue with Google"; no email or password input fields visible
-- [x] 1.7 Same for `/auth/signup`
-- [x] 1.8 Clicking "Continue with Google" (before Phase 2 credentials exist) produces a Supabase error visible as `?error=…` on `/auth/signin` — the round-trip wiring is reachable, the failure is in provider-credentials-not-configured (which is expected at the Phase 1 gate)
-- [x] 1.9 `/dashboard` still 302s to `/auth/signin` for an anonymous request (middleware not regressed)
-- [x] 1.10 `curl -X POST http://localhost:4321/api/auth/signin -d 'email=x&password=y'` returns 403 "Cross-site POST form submissions are forbidden" (Astro CSRF middleware short-circuits before the route resolver — a stronger guarantee than the planned 404; password surface unreachable). Same for `/api/auth/signup`.
+- [x] 1.6 `npm run dev` → visit `/auth/signin`: page renders, exactly one button visible, labeled "Continue with Google"; no email or password input fields visible — 98a65c5
+- [x] 1.7 Same for `/auth/signup` — 98a65c5
+- [x] 1.8 Clicking "Continue with Google" (before Phase 2 credentials exist) produces a Supabase error visible as `?error=…` on `/auth/signin` — the round-trip wiring is reachable, the failure is in provider-credentials-not-configured (which is expected at the Phase 1 gate) — 98a65c5
+- [x] 1.9 `/dashboard` still 302s to `/auth/signin` for an anonymous request (middleware not regressed) — 98a65c5
+- [x] 1.10 `curl -X POST http://localhost:4321/api/auth/signin -d 'email=x&password=y'` returns 403 "Cross-site POST form submissions are forbidden" (Astro CSRF middleware short-circuits before the route resolver — a stronger guarantee than the planned 404; password surface unreachable). Same for `/api/auth/signup`. — 98a65c5
 
 ### Phase 2: Provider activation + end-to-end verification
 
 #### Automated
 
-- [ ] 2.1 `vercel env ls` shows no NEW env vars expected (Google credentials live in Supabase Studio, not in Vercel — this is a verification *that we did not accidentally add them to Vercel*)
-- [ ] 2.2 `git status` is clean after Phase 1 commit (no Phase-2 changes alter tracked files)
+- [x] 2.1 `vercel env ls` shows no NEW env vars expected (Google credentials live in Supabase Studio, not in Vercel — this is a verification *that we did not accidentally add them to Vercel*)
+- [x] 2.2 `git status` is clean after Phase 1 commit (no Phase-2 changes alter tracked files) — interpreted as "no Phase-2 source/config changes outside the Phase-1 SHA write-back", which is satisfied
 
 #### Manual
 
-- [ ] 2.3 `npm run dev` (with `vercel env pull .env` already done so SUPABASE_URL/ANON_KEY are populated) → visit `http://localhost:4321/auth/signin` → click "Continue with Google" → Google consent screen renders → consent → land on `http://localhost:4321/` with the user signed in → `/dashboard` renders and shows the Google account's email
-- [ ] 2.4 On production: visit `https://10xdevs-lilac.vercel.app/auth/signin` → click "Continue with Google" → consent → land on `https://10xdevs-lilac.vercel.app/` signed in → `/dashboard` renders with email
-- [ ] 2.5 Preview-deploy verification: push a feature branch / open a no-op PR; run the Google sign-in round-trip on the preview URL; confirm sign-in lands signed-in (exercises the Vercel–Supabase integration redirect-URI auto-sync deferred from `deploy-plan.md` Phase 3 step 13). Close/abandon the PR after verification.
-- [ ] 2.6 Tag the prod-verified deploy: `git tag prod-2026-MM-DD-1 && git push origin --tags` (per the `infrastructure.md` rollback discipline)
-- [ ] 2.7 Sign out via `/dashboard`'s POST form continues to work; subsequent `/dashboard` request 302s to `/auth/signin` (sanity that session was actually removed)
+- [x] 2.3 `npm run dev` (with `vercel env pull .env` already done so SUPABASE_URL/ANON_KEY are populated) → visit `http://localhost:4321/auth/signin` → click "Continue with Google" → Google consent screen renders → consent → land on `http://localhost:4321/` with the user signed in → `/dashboard` renders and shows the Google account's email. **Implementation tripwire**: local `.env` had stale `SUPABASE_KEY` (pre-deploy-plan-rename); needed in-place rename to `SUPABASE_ANON_KEY` + dev-server restart before the env schema saw it.
+- [x] 2.4 On production: visit `https://10xdevs-lilac.vercel.app/auth/signin` → click "Continue with Google" → consent → land on `https://10xdevs-lilac.vercel.app/` signed in → `/dashboard` renders with email. **Implementation tripwire**: prod Supabase project (`dchurjcpgzuoyunjsokl`) is provisioned by the Vercel–Supabase Marketplace integration and is distinct from the project the local `.env` pointed at (`uldvnsbhztupwemzityg`). The Vercel-managed project must be reached via Vercel → Storage → "Open in Supabase" (no direct Supabase Studio access). Google provider had to be enabled separately on the prod-bound project; Google Cloud OAuth client's authorized redirect URIs needed BOTH supabase project callback URLs (`https://<each-ref>.supabase.co/auth/v1/callback`) since dev and prod hit different Supabase projects.
+- [x] 2.5 Preview-deploy verification: push a feature branch / open a no-op PR; run the Google sign-in round-trip on the preview URL; confirm sign-in lands signed-in (exercises the Vercel–Supabase integration redirect-URI auto-sync deferred from `deploy-plan.md` Phase 3 step 13). Close/abandon the PR after verification. **Real failure mode (lesson-worthy)**: integration's preview-URL auto-sync is NOT actually wiring preview URLs into the Supabase Redirect URLs allowlist, contra `infrastructure.md`'s claim. First sign-in attempt silently bounced from preview to prod Site URL with code on `/` (no `/auth/callback` exchange = no session). Workaround applied: add wildcard `https://**.vercel.app/auth/callback` to Supabase Studio → Authentication → URL Configuration → Redirect URLs (tighter patterns like `https://*-aspirew.vercel.app/...` were rejected by Studio's form validator — `**` works because the UI URL parser accepts it as a structurally-valid hostname). Verified end-to-end on `https://10xdevs-dvx06ugqf-aspirew.vercel.app` via throwaway branch `oauth-preview-verify` (deleted post-verification). **Security tradeoff**: wildcard accepts any `.vercel.app` subdomain — practical exposure is small given PKCE + Deployment Protection on previews, but tighter pattern recommended for v2.
+- [x] 2.6 Tag the prod-verified deploy: `git tag prod-2026-MM-DD-1 && git push origin --tags` (per the `infrastructure.md` rollback discipline). Tagged `prod-2026-05-27-3` on commit `98a65c5` (continues prod-2026-05-27-1/-2 series from deploy-plan.md Phase 3).
+- [x] 2.7 Sign out via `/dashboard`'s POST form continues to work; subsequent `/dashboard` request 302s to `/auth/signin` (sanity that session was actually removed). Verified additionally via multi-account swap (sign in / sign out / sign in as different Google account).
