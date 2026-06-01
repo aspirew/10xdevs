@@ -1,29 +1,48 @@
 import type { APIRoute } from "astro";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 
+// See /api/groups/index.ts for context on why admin-client + app-layer auth replaces
+// the user-scoped client + RLS gate (broken PostgREST auth.uid() in this project).
 export const POST: APIRoute = async (context) => {
+  const user = context.locals.user;
+  if (!user) {
+    return context.redirect(`/auth/signin?error=${encodeURIComponent("Please sign in")}`);
+  }
+
   const { id } = context.params;
   if (!id) {
     return context.redirect(`/groups?error=${encodeURIComponent("Missing group id")}`);
   }
 
-  const supabase = createClient(context.request.headers, context.cookies);
-  if (!supabase) {
-    return context.redirect(`/groups/${id}?error=${encodeURIComponent("Supabase is not configured")}`);
+  const admin = createAdminClient();
+  if (!admin) {
+    return context.redirect(`/groups/${id}?error=${encodeURIComponent("Supabase admin client is not configured")}`);
+  }
+
+  // App-layer creator check (replaces RLS "groups: creator updates" policy).
+  const { data: group, error: lookupError } = await admin
+    .from("groups")
+    .select("created_by")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (lookupError) {
+    return context.redirect(`/groups?error=${encodeURIComponent(lookupError.message)}`);
+  }
+  if (!group) {
+    return context.redirect(`/groups?error=${encodeURIComponent("Group not found")}`);
+  }
+  if (group.created_by !== user.id) {
+    return context.redirect(
+      `/groups/${id}?error=${encodeURIComponent("Only the group creator can regenerate the invite link")}`,
+    );
   }
 
   const newToken = crypto.randomUUID();
-  const { data, error } = await supabase.from("groups").update({ invite_token: newToken }).eq("id", id).select("id");
+  const { error: updateError } = await admin.from("groups").update({ invite_token: newToken }).eq("id", id);
 
-  if (error) {
-    return context.redirect(`/groups/${id}?error=${encodeURIComponent(error.message)}`);
-  }
-  if (data.length === 0) {
-    // RLS "groups: creator updates" policy blocked the write (non-creator),
-    // or the group doesn't exist. Don't distinguish — both mean "you can't do this".
-    return context.redirect(
-      `/groups?error=${encodeURIComponent("Group not found or you don't have permission to regenerate its invite link")}`,
-    );
+  if (updateError) {
+    return context.redirect(`/groups/${id}?error=${encodeURIComponent(updateError.message)}`);
   }
 
   return context.redirect(`/groups/${id}`, 302);

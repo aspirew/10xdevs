@@ -58,6 +58,13 @@ The PKCE OAuth flow from F-01 is the only authentication mechanism touched. No m
 - **`/invite/[token]` is an `.astro` page, not an `/api/` endpoint.** Reason: the page has two render paths (authed → server-side INSERT + redirect; anonymous → render "Sign in to join" CTA). Both need access to `Astro.locals.user` and Astro's redirect mechanics. The page is server-rendered (Astro's `output: "server"` in `astro.config.mjs:12`); no client island needed.
 - **OAuth `next` must be same-origin only.** When the OAuth-start route reads `next` from the form, validate by URL-parsing: `new URL(next, context.url.origin).origin === context.url.origin`. The naive `startsWith("/") && !startsWith("//")` heuristic misses backslash-prefix edge cases like `/\evil.com/foo` that some browser URL parsers normalize to `//evil.com/foo`. URL-parsing + origin equality is one extra line and rigorously closed. Defense-in-depth re-validation in `/auth/callback`.
 - **Post-Phase-2 adaptation — `next` is threaded via cookie, NOT via `?next=` on `redirectTo`.** The original plan called for appending `?next=<path>` to Supabase's `redirectTo`. Phase 2 verification 2.9 (per lessons.md rule #1) surfaced the predicted failure: Supabase's redirect-URL allowlist matches the FULL URL including query string, so any `?next=...` makes the URL miss the allowlist and Supabase silently falls back to Site URL (bouncing the user to prod root with `?code=...`, no session). The cookie fallback documented in plan-review F4 is now the canonical implementation: `pending_oauth_next` cookie (HttpOnly, SameSite=Lax, 5-min maxAge, Secure-in-prod) set by `/api/auth/oauth/google` and read+cleared by `/auth/callback`. SameSite=Lax is required so the cookie survives the cross-origin round-trip (localhost → Google → Supabase → localhost) and is sent on the final top-level GET to `/auth/callback`.
+
+- **Post-Phase-3 adaptation — RLS replaced by service-role + middleware-verified `locals.user` (Supabase asymmetric-JWT platform bug).** Phase 3.9 surfaced an empirical platform issue: this Supabase project's PostgREST does not validate JWTs signed with the asymmetric (ECC P-256 / ES256) keys the project now uses for auth tokens. `auth.uid()` returns NULL inside RLS even when a valid JWT is sent (verified via JWT-claim decode showing correct `sub`/`role`/`aud`, direct fetch with explicit Bearer returning the same 403, and swapping legacy `SUPABASE_ANON_KEY` for new-format `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as apikey — same result). RLS `WITH CHECK (col = auth.uid())` policies cannot be satisfied. **All group-touching DB calls now use `createAdminClient()` (service-role; bypasses RLS) with `locals.user` (populated by middleware's `supabase.auth.getUser()` — that path validates against the Supabase Auth API, which is a separate code path from PostgREST and DOES work).** Specific guards moved from DB to app code:
+  - "Only creator can regenerate invite": app-layer check `group.created_by !== user.id` in `/api/groups/[id]/regenerate-invite.ts`.
+  - "Only members can read a group": app-layer membership check (`memberUserIds.includes(user.id)`) in `/groups/[id].astro` before populating the `group` variable.
+  - "Only members can list their groups": app-layer filter via subquery on `group_members` in `/groups/index.astro`.
+  
+  The RLS policies in `supabase/migrations/20260601210816_groups_and_members.sql` remain unchanged. They function as defense-in-depth: any direct REST call from an external user IS still gated by RLS (auth.uid() = NULL → SELECT policy denies, INSERT/UPDATE WITH CHECK denies). The app uses service-role to escape this layer because the same RLS layer would also block our authenticated users (the exact bug). Captured as a recurring rule in `context/foundation/lessons.md`. Revisit (and revert to user-scoped client + RLS gate) if Supabase fixes the project-level JWT validation.
 - **Single Supabase project after Prerequisites.** Every subsequent migration, RLS policy, and Studio config change lands on `dchurjcpgzuoyunjsokl`. Future planning should NOT introduce a separate "dev" project unless there's a hard reason — the lessons.md rule chose consolidation deliberately.
 
 ## Prerequisites (operational — do before Phase 1)
@@ -445,40 +452,40 @@ This is the project's first migration. Going forward:
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npm run typecheck` passes
-- [x] 2.3 `npm run build` passes
-- [x] 2.4 All five new/modified files exist (`src/pages/api/groups/index.ts`, `src/pages/api/groups/[id]/regenerate-invite.ts`, `src/pages/invite/[token].astro`, `src/lib/supabase-admin.ts`, plus diffs in `src/pages/api/auth/oauth/google.ts` + `src/pages/auth/callback.ts`)
+- [x] 2.1 `npm run lint` passes — fa93ef5
+- [x] 2.2 `npm run typecheck` passes — fa93ef5
+- [x] 2.3 `npm run build` passes — fa93ef5
+- [x] 2.4 All five new/modified files exist (`src/pages/api/groups/index.ts`, `src/pages/api/groups/[id]/regenerate-invite.ts`, `src/pages/invite/[token].astro`, `src/lib/supabase-admin.ts`, plus diffs in `src/pages/api/auth/oauth/google.ts` + `src/pages/auth/callback.ts`) — fa93ef5
 
 #### Manual
 
-- [x] 2.5 Sign in on localhost; create a test group via SQL editor (or leave from Phase 1); note `invite_token`. Used: name="Test Crew", invite_token=`ef1d7abd-985d-42a9-8edf-534df2ec7d3e`.
-- [x] 2.6 Visit `/invite/<token>` as the same signed-in user → land on `/groups/<id>`; idempotent on re-visit. (First-pass detour: wrong token in URL → "Invite not found" page rendered correctly — proves lookup path. Correct URL → membership inserted, redirect to `/groups/<id>` which 404s pre-Phase-3 as expected.)
-- [x] 2.7 Sign out; visit invite link anonymously → see "Continue with Google to join '<name>'" CTA; OAuth round-trip returns to `/invite/<token>` then `/groups/<id>` signed in. **Required the cookie-fallback adaptation from 2.9 before working.** Also required browser-cookie clear to flush stale PKCE state from the failed first attempt.
-- [x] 2.8 `curl -X POST localhost:4321/api/auth/oauth/google -d 'next=https://evil.example.com'` → Supabase redirect URL does NOT contain `evil.example.com` (open-redirect validation). Astro CSRF gate 403s a plain curl pre-route (same as F-01 1.10); same-origin curl (with `-H 'Origin: http://localhost:4321'`) confirms the route's URL-parse validator rejects the cross-origin path — Location header's `redirect_to=http%3A%2F%2Flocalhost%3A4321%2Fauth%2Fcallback` (no `next=`), Set-Cookie carries only Supabase's PKCE verifier (no `pending_oauth_next`).
-- [x] 2.9 Query-string-merge verification (lessons.md rule #1): during the anonymous-invite OAuth round-trip from 2.7, inspect the URL the browser lands on after Google consent. It MUST contain BOTH `next=/invite/<token>` AND `code=<…>` as distinct query parameters joined by `&` (e.g. `?next=…&code=…&type=…`). If Supabase mishandles the merge (`?next=…?code=…` or `next` missing), the `?next=` thread-through is broken — fall back to a short-lived cookie-based hand-off (set `pending_invite_token=<token>` cookie in `/api/auth/oauth/google` for ~5 min, read + clear it in `/auth/callback`, redirect to `/invite/<token>` if set). The fallback path stays out of code until/unless this verification fails. **VERIFICATION SURFACED THE PREDICTED FAILURE**: Supabase rejected the `?next=`-bearing `redirectTo` (allowlist matching includes query strings; no wildcard entry matches `?next=<any>`), fell back to Site URL, browser landed on `https://10xdevs-lilac.vercel.app/?code=…` (PROD URL at root, NOT localhost callback). Lessons rule #1 verification PAID OFF — implemented the documented cookie fallback (`pending_oauth_next` cookie, HttpOnly + SameSite=Lax + 5-min maxAge + Secure-in-prod). Round-trip now lands cleanly on `http://localhost:4321/auth/callback?code=…` and redirects to `/invite/<token>` → `/groups/<id>`.
+- [x] 2.5 Sign in on localhost; create a test group via SQL editor (or leave from Phase 1); note `invite_token`. Used: name="Test Crew", invite_token=`ef1d7abd-985d-42a9-8edf-534df2ec7d3e`. — fa93ef5
+- [x] 2.6 Visit `/invite/<token>` as the same signed-in user → land on `/groups/<id>`; idempotent on re-visit. (First-pass detour: wrong token in URL → "Invite not found" page rendered correctly — proves lookup path. Correct URL → membership inserted, redirect to `/groups/<id>` which 404s pre-Phase-3 as expected.) — fa93ef5
+- [x] 2.7 Sign out; visit invite link anonymously → see "Continue with Google to join '<name>'" CTA; OAuth round-trip returns to `/invite/<token>` then `/groups/<id>` signed in. **Required the cookie-fallback adaptation from 2.9 before working.** Also required browser-cookie clear to flush stale PKCE state from the failed first attempt. — fa93ef5
+- [x] 2.8 `curl -X POST localhost:4321/api/auth/oauth/google -d 'next=https://evil.example.com'` → Supabase redirect URL does NOT contain `evil.example.com` (open-redirect validation). Astro CSRF gate 403s a plain curl pre-route (same as F-01 1.10); same-origin curl (with `-H 'Origin: http://localhost:4321'`) confirms the route's URL-parse validator rejects the cross-origin path — Location header's `redirect_to=http%3A%2F%2Flocalhost%3A4321%2Fauth%2Fcallback` (no `next=`), Set-Cookie carries only Supabase's PKCE verifier (no `pending_oauth_next`). — fa93ef5
+- [x] 2.9 Query-string-merge verification (lessons.md rule #1): during the anonymous-invite OAuth round-trip from 2.7, inspect the URL the browser lands on after Google consent. It MUST contain BOTH `next=/invite/<token>` AND `code=<…>` as distinct query parameters joined by `&` (e.g. `?next=…&code=…&type=…`). If Supabase mishandles the merge (`?next=…?code=…` or `next` missing), the `?next=` thread-through is broken — fall back to a short-lived cookie-based hand-off (set `pending_invite_token=<token>` cookie in `/api/auth/oauth/google` for ~5 min, read + clear it in `/auth/callback`, redirect to `/invite/<token>` if set). The fallback path stays out of code until/unless this verification fails. **VERIFICATION SURFACED THE PREDICTED FAILURE**: Supabase rejected the `?next=`-bearing `redirectTo` (allowlist matching includes query strings; no wildcard entry matches `?next=<any>`), fell back to Site URL, browser landed on `https://10xdevs-lilac.vercel.app/?code=…` (PROD URL at root, NOT localhost callback). Lessons rule #1 verification PAID OFF — implemented the documented cookie fallback (`pending_oauth_next` cookie, HttpOnly + SameSite=Lax + 5-min maxAge + Secure-in-prod). Round-trip now lands cleanly on `http://localhost:4321/auth/callback?code=…` and redirects to `/invite/<token>` → `/groups/<id>`. — fa93ef5
 
 ### Phase 3: UI pages + nav update
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npm run typecheck` passes
-- [ ] 3.3 `npm run build` passes
-- [ ] 3.4 `src/components/ui/{card,input,label}.tsx` exist
-- [ ] 3.5 `src/pages/groups/{index,new,[id]}.astro` exist
-- [ ] 3.6 `src/pages/dashboard.astro` does NOT exist
-- [ ] 3.7 `src/middleware.ts` `PROTECTED_ROUTES` includes `/groups`
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npm run typecheck` passes
+- [x] 3.3 `npm run build` passes
+- [x] 3.4 `src/components/ui/{card,input,label}.tsx` exist
+- [x] 3.5 `src/pages/groups/{index,new,[id]}.astro` exist
+- [x] 3.6 `src/pages/dashboard.astro` does NOT exist
+- [x] 3.7 `src/middleware.ts` `PROTECTED_ROUTES` includes `/groups`
 
 #### Manual
 
-- [ ] 3.8 Sign in fresh → land on `/groups` (not `/`, not `/dashboard`)
-- [ ] 3.9 Create "Test Crew" via `/groups/new` → land on `/groups/<id>` with one member, invite link displayed; copy the invite link to the clipboard
-- [ ] 3.10 Open invite URL in incognito → "Continue with Google to join 'Test Crew'" → consent with a different Google account → land on `/groups/<id>` as the new member; member count = 2
-- [ ] 3.11 Reload from creator's session → see two members
-- [ ] 3.12 Regenerate invite (as creator) → previous URL returns "Invite not found" in incognito
-- [ ] 3.13 Topbar shows "Groups" link; `/dashboard` returns 404
-- [ ] 3.14 Sign out from `/groups` → redirects to `/auth/signin`
-- [ ] 3.15 RLS sanity (browser path): from a second Google account NOT invited, navigating to `/groups/<id>` directly returns 404 / "Group not found"
-- [ ] 3.16 RLS sanity (REST path): curl Supabase `/rest/v1/groups?id=eq.<id>` with the second user's JWT + anon-key headers → returns `[]` (validates the actual RLS boundary, not the app's 404 projection)
+- [x] 3.8 Sign in fresh → land on `/groups` (not `/`, not `/dashboard`)
+- [x] 3.9 Create "Test Crew" via `/groups/new` → land on `/groups/<id>` with one member, invite link displayed; copy the invite link to the clipboard. **Required Path-3 platform-workaround refactor before working** (see Critical Implementation Details addendum below). First-pass failed with PostgreSQL RLS `42501` because PostgREST in this project does not validate ES256/asymmetric JWTs (verified via JWT-claim decode + direct fetch + apikey swap — all returned 403). Refactored every group-touching DB call to use the admin (service-role) client with middleware-verified `locals.user` as the auth gate; RLS policies in the migration remain as defense-in-depth but are not the operative gate.
+- [x] 3.10 Open invite URL in incognito → "Continue with Google to join 'Test Crew'" → consent with a different Google account → land on `/groups/<id>` as the new member; member count = 2
+- [x] 3.11 Reload from creator's session → see two members
+- [x] 3.12 Regenerate invite (as creator) → previous URL returns "Invite not found" in incognito
+- [x] 3.13 Topbar shows "Groups" link; `/dashboard` returns 404
+- [x] 3.14 Sign out from `/groups` → redirects to `/auth/signin`
+- [x] 3.15 RLS sanity (browser path): from a second Google account NOT invited, navigating to `/groups/<id>` directly returns 404 / "Group not found". Note: this now exercises the **app-layer** membership check in `/groups/[id].astro` (the operative gate post-Path-3 refactor), not the RLS USING policy.
+- [x] 3.16 RLS sanity (REST path): curl Supabase `/rest/v1/groups?id=eq.<id>` with the second user's JWT + anon-key headers → returns `[]` (validates the actual RLS boundary, not the app's 404 projection). With auth.uid() returning NULL the user appears as anon to PostgREST, so the SELECT policy's `using (public.is_group_member(id))` evaluates `is_group_member(id) = exists(... where user_id = NULL) = false` → empty result. Defense-in-depth still holds at the REST layer.
 - [ ] 3.17 Repeat happy path on prod (`https://10xdevs-lilac.vercel.app`); tag prod deploy `prod-2026-MM-DD-1`

@@ -1,0 +1,62 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect(`/auth/signin?error=${encodeURIComponent("Please sign in")}`, 302);
+}
+
+const error = Astro.url.searchParams.get("error");
+---
+
+<Layout title="New group">
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <div class="mx-auto max-w-md">
+      <Topbar />
+
+      <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+        <h1
+          class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent"
+        >
+          New group
+        </h1>
+        {
+          error && (
+            <p
+              role="alert"
+              class="mb-4 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+            >
+              <span aria-hidden="true" class="font-bold">
+                !
+              </span>
+              <span>{error}</span>
+            </p>
+          )
+        }
+        <form method="POST" action="/api/groups" class="space-y-4">
+          <div>
+            <label for="name" class="mb-1 block text-sm font-medium text-blue-100/80">Group name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              placeholder="e.g. Game Night Crew"
+              class="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/30 focus:border-purple-400 focus:outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+          >
+            Create group
+          </button>
+        </form>
+        <p class="mt-4 text-center text-sm text-blue-100/60">
+          <a href="/groups" class="text-purple-300 hover:underline">Back to your groups</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>

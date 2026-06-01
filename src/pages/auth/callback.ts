@@ -39,6 +39,6 @@ export const GET: APIRoute = async (context) => {
   const pendingNext = context.cookies.get(PENDING_OAUTH_NEXT_COOKIE)?.value ?? null;
   context.cookies.delete(PENDING_OAUTH_NEXT_COOKIE, { path: "/" });
 
-  const target = isSafeSameOriginPath(pendingNext, context.url.origin) ? pendingNext : "/";
+  const target = isSafeSameOriginPath(pendingNext, context.url.origin) ? pendingNext : "/groups";
   return context.redirect(target, 302);
 };

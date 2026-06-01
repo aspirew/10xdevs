@@ -1,0 +1,129 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect(`/auth/signin?error=${encodeURIComponent("Please sign in")}`, 302);
+}
+
+const error = Astro.url.searchParams.get("error");
+const admin = createAdminClient();
+
+// App-layer filter: get group_ids the user belongs to, then fetch those groups.
+// RLS "groups: members read" would normally do this implicitly, but auth.uid() is
+// broken in this project — see /api/groups/index.ts for context.
+interface GroupListItem {
+  id: string;
+  name: string;
+  created_at: string;
+  group_members: { user_id: string }[];
+}
+
+let groups: GroupListItem[] = [];
+let listError: string | null = null;
+if (!admin) {
+  listError = "Supabase admin client is not configured";
+} else {
+  const { data: memberships, error: memErr } = await admin
+    .from("group_members")
+    .select("group_id")
+    .eq("user_id", user.id)
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    .returns<{ group_id: string }[]>();
+  if (memErr) {
+    listError = memErr.message;
+  } else if (memberships.length > 0) {
+    const groupIds = memberships.map((m) => m.group_id);
+    const { data, error: queryError } = await admin
+      .from("groups")
+      .select("id, name, created_at, group_members(user_id)")
+      .in("id", groupIds)
+      .order("created_at", { ascending: false })
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- see /groups/[id].astro
+      .returns<GroupListItem[]>();
+    if (queryError) {
+      listError = queryError.message;
+    } else {
+      groups = data;
+    }
+  }
+}
+---
+
+<Layout title="Your groups">
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <div class="mx-auto max-w-4xl">
+      <Topbar />
+
+      <div class="mb-6 flex items-center justify-between">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Your groups
+        </h1>
+        <a
+          href="/groups/new"
+          class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+        >
+          New group
+        </a>
+      </div>
+
+      {
+        error && (
+          <p
+            role="alert"
+            class="mb-4 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+          >
+            <span aria-hidden="true" class="font-bold">
+              !
+            </span>
+            <span>{error}</span>
+          </p>
+        )
+      }
+      {
+        listError && (
+          <p
+            role="alert"
+            class="mb-4 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+          >
+            <span aria-hidden="true" class="font-bold">
+              !
+            </span>
+            <span>{listError}</span>
+          </p>
+        )
+      }
+
+      {
+        groups.length === 0 && !listError && (
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-white backdrop-blur-xl">
+            <p class="text-blue-100/80">You're not in any groups yet.</p>
+            <p class="mt-2 text-sm text-blue-100/50">Create one and invite friends.</p>
+          </div>
+        )
+      }
+
+      {
+        groups.length > 0 && (
+          <ul class="space-y-3">
+            {groups.map((g) => (
+              <li>
+                <a
+                  href={`/groups/${g.id}`}
+                  class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 text-white backdrop-blur-xl transition-colors hover:bg-white/10"
+                >
+                  <span class="font-semibold">{g.name}</span>
+                  <span class="text-sm text-blue-100/60">
+                    {g.group_members.length} {g.group_members.length === 1 ? "member" : "members"}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+</Layout>

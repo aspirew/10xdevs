@@ -1,6 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { createClient } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 const { token } = Astro.params;
@@ -9,9 +8,11 @@ if (!token) {
   return Astro.redirect(`/groups?error=${encodeURIComponent("Missing invite token")}`, 302);
 }
 
-// Lookup the group by invite_token using the service-role client.
-// RLS on `groups` would hide it from anonymous visitors otherwise, but we need
-// to know whether the token is valid before sending the user through OAuth.
+// Use the admin client throughout: the token lookup needs RLS-bypass (anon visitors
+// can't read groups otherwise), and the membership upsert ALSO needs admin because
+// PostgREST's auth.uid() is broken in this project (see /api/groups/index.ts).
+// `user` comes from middleware-verified locals.user, so user.id is trustworthy as
+// the membership identity.
 const admin = createAdminClient();
 let group: { id: string; name: string } | null = null;
 let lookupError: string | null = null;
@@ -29,18 +30,15 @@ if (!admin) {
 
 const user = Astro.locals.user;
 
-// Authed visitor: insert membership (idempotent via composite PK) and redirect to the group.
-if (group && user) {
-  const supabase = createClient(Astro.request.headers, Astro.cookies);
-  if (supabase) {
-    const { error } = await supabase
-      .from("group_members")
-      .upsert({ group_id: group.id, user_id: user.id }, { onConflict: "group_id,user_id", ignoreDuplicates: true });
-    if (error) {
-      return Astro.redirect(`/groups?error=${encodeURIComponent(error.message)}`, 302);
-    }
-    return Astro.redirect(`/groups/${group.id}`, 302);
+// Authed visitor: insert membership (idempotent via composite PK) and redirect.
+if (group && user && admin) {
+  const { error } = await admin
+    .from("group_members")
+    .upsert({ group_id: group.id, user_id: user.id }, { onConflict: "group_id,user_id", ignoreDuplicates: true });
+  if (error) {
+    return Astro.redirect(`/groups?error=${encodeURIComponent(error.message)}`, 302);
   }
+  return Astro.redirect(`/groups/${group.id}`, 302);
 }
 ---
 
