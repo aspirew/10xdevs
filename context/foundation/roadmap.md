@@ -3,7 +3,7 @@ project: GameSlot
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-06-01
+updated: 2026-06-02
 prd_version: 1
 main_goal: market-feedback
 top_blocker: time
@@ -29,7 +29,7 @@ GameSlot is a single, shared, lightweight calendar for one friend group: members
 | ----- | -------------------------------------- | ------------------------------------------------------------------- | ------------- | ------------------------------------- | -------- |
 | F-01  | google-oauth-signin                    | (foundation) Sign in via Google OAuth                               | —             | FR-001, Access Control                | done     |
 | F-02  | pwa-shell-and-push-delivery            | (foundation) PWA installs; push delivered via web-push              | —             | NFR §PWA, FR-012 (delivery path)      | ready    |
-| S-01  | create-group-and-invite                | Create a friend group and bring members in via an invite link       | F-01          | FR-002, FR-003, FR-004, US-01         | proposed |
+| S-01  | create-group-and-invite                | Create a friend group and bring members in via an invite link       | F-01          | FR-002, FR-003, FR-004, US-01         | done     |
 | S-02  | mark-availability-with-overlap         | Mark availability and see who else is free, with overlap surfaced   | S-01          | FR-005, FR-006, FR-007, FR-008, US-01 | proposed |
 | S-03  | confirm-session-with-push-notification | Confirm a session at an overlapping slot and notify the whole group | S-02, F-02    | FR-009, FR-010, FR-011, FR-012, US-01 | proposed |
 
@@ -98,7 +98,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Invite-link lifecycle — expiry / rotation / revoke (PRD Open Q #1). Owner: user. Block: no for v1 (single-group validation; revisit before any growth phase).
 - **Risk:** Schema decisions for `groups` and `group_members` land here, including the privacy NFR's RLS posture. Get the RLS pattern right once because S-02 and S-03 will copy it for their tables.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Mark availability with overlap surfacing
 
@@ -162,3 +162,4 @@ These are explicitly out of v1 scope. They will not sneak into any slice's scope
 ## Done
 
 - **F-01: (foundation) GameSlot users sign in via Google OAuth; `signInWithOAuth` is wired end-to-end across local dev, preview, and prod; the OAuth callback handler issues a Supabase session.** — Archived 2026-06-01 → `context/archive/2026-05-27-google-oauth-signin/`. Lesson: —.
+- **S-01: A signed-in user can create a friend group, generate a shareable invite link for that group, and a different signed-in user who opens that link joins the group.** — Archived 2026-06-02 → `context/archive/2026-06-01-create-group-and-invite/`. Lesson: surfaced "Verify PostgREST honors `auth.uid()` before relying on RLS as the auth gate on Supabase projects" → context/foundation/lessons.md.
