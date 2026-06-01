@@ -3,7 +3,7 @@ project: GameSlot
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-05-27
+updated: 2026-06-01
 prd_version: 1
 main_goal: market-feedback
 top_blocker: time
@@ -27,7 +27,7 @@ GameSlot is a single, shared, lightweight calendar for one friend group: members
 
 | ID    | Change ID                              | Outcome (user can …)                                                | Prerequisites | PRD refs                              | Status   |
 | ----- | -------------------------------------- | ------------------------------------------------------------------- | ------------- | ------------------------------------- | -------- |
-| F-01  | google-oauth-signin                    | (foundation) Sign in via Google OAuth                               | —             | FR-001, Access Control                | ready    |
+| F-01  | google-oauth-signin                    | (foundation) Sign in via Google OAuth                               | —             | FR-001, Access Control                | done     |
 | F-02  | pwa-shell-and-push-delivery            | (foundation) PWA installs; push delivered via web-push              | —             | NFR §PWA, FR-012 (delivery path)      | ready    |
 | S-01  | create-group-and-invite                | Create a friend group and bring members in via an invite link       | F-01          | FR-002, FR-003, FR-004, US-01         | proposed |
 | S-02  | mark-availability-with-overlap         | Mark availability and see who else is free, with overlap surfaced   | S-01          | FR-005, FR-006, FR-007, FR-008, US-01 | proposed |
@@ -69,7 +69,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Should the inherited starter's email/password auth scaffold be removed to match PRD's Google-only stance, or kept dormant? — Owner: user. Block: no (default = keep dormant; rip-out is scope-creep against `time` blocker).
 - **Risk:** Small scope — most wiring exists from `deploy-plan.md` Phase 2 (config.toml block, env var schema, integration installed). The Google Cloud OAuth client creation is a manual human-only step inside this Foundation, not a separate Blocker. Critical path because every slice depends on a signed-in user.
-- **Status:** ready
+- **Status:** done
 
 ### F-02: PWA shell + Web Push delivery
 
@@ -161,4 +161,4 @@ These are explicitly out of v1 scope. They will not sneak into any slice's scope
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends here when a change whose `Change ID` matches a roadmap item is archived.)
+- **F-01: (foundation) GameSlot users sign in via Google OAuth; `signInWithOAuth` is wired end-to-end across local dev, preview, and prod; the OAuth callback handler issues a Supabase session.** — Archived 2026-06-01 → `context/archive/2026-05-27-google-oauth-signin/`. Lesson: —.
