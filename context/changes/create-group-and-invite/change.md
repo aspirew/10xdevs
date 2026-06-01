@@ -1,7 +1,7 @@
 ---
 change_id: create-group-and-invite
 title: Create a friend group and invite friends via a shareable link
-status: implemented
+status: impl_reviewed
 created: 2026-06-01
 updated: 2026-06-02
 archived_at: null
