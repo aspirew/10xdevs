@@ -56,7 +56,8 @@ The PKCE OAuth flow from F-01 is the only authentication mechanism touched. No m
 - **RLS recursion trap on `group_members`.** A naive policy like `USING (group_id IN (SELECT group_id FROM group_members WHERE user_id = auth.uid()))` on `group_members` itself recurses (the sub-SELECT triggers the same policy). The standard fix is a `SECURITY DEFINER` SQL function `is_group_member(g uuid) RETURNS boolean` that bypasses RLS for its inner read; policies then call the function rather than self-querying. This is the load-bearing trick that keeps the policy set both correct and readable.
 - **Invite token uniqueness + regeneration semantics.** `invite_token` is `text NOT NULL UNIQUE DEFAULT gen_random_uuid()::text`. Regenerate = `UPDATE groups SET invite_token = gen_random_uuid()::text WHERE id = $1 AND created_by = auth.uid()` (creator-only). Old token is now unbound to any row; any previously-shared link returns "invite not found". This IS the v1 revoke mechanism.
 - **`/invite/[token]` is an `.astro` page, not an `/api/` endpoint.** Reason: the page has two render paths (authed → server-side INSERT + redirect; anonymous → render "Sign in to join" CTA). Both need access to `Astro.locals.user` and Astro's redirect mechanics. The page is server-rendered (Astro's `output: "server"` in `astro.config.mjs:12`); no client island needed.
-- **OAuth `?next=` must be same-origin only.** When the OAuth-start route reads `next` from the form/query, validate by URL-parsing: `new URL(next, context.url.origin).origin === context.url.origin`. The naive `startsWith("/") && !startsWith("//")` heuristic misses backslash-prefix edge cases like `/\evil.com/foo` that some browser URL parsers normalize to `//evil.com/foo`. URL-parsing + origin equality is one extra line and rigorously closed. Same validation in `/auth/callback`.
+- **OAuth `next` must be same-origin only.** When the OAuth-start route reads `next` from the form, validate by URL-parsing: `new URL(next, context.url.origin).origin === context.url.origin`. The naive `startsWith("/") && !startsWith("//")` heuristic misses backslash-prefix edge cases like `/\evil.com/foo` that some browser URL parsers normalize to `//evil.com/foo`. URL-parsing + origin equality is one extra line and rigorously closed. Defense-in-depth re-validation in `/auth/callback`.
+- **Post-Phase-2 adaptation — `next` is threaded via cookie, NOT via `?next=` on `redirectTo`.** The original plan called for appending `?next=<path>` to Supabase's `redirectTo`. Phase 2 verification 2.9 (per lessons.md rule #1) surfaced the predicted failure: Supabase's redirect-URL allowlist matches the FULL URL including query string, so any `?next=...` makes the URL miss the allowlist and Supabase silently falls back to Site URL (bouncing the user to prod root with `?code=...`, no session). The cookie fallback documented in plan-review F4 is now the canonical implementation: `pending_oauth_next` cookie (HttpOnly, SameSite=Lax, 5-min maxAge, Secure-in-prod) set by `/api/auth/oauth/google` and read+cleared by `/auth/callback`. SameSite=Lax is required so the cookie survives the cross-origin round-trip (localhost → Google → Supabase → localhost) and is sent on the final top-level GET to `/auth/callback`.
 - **Single Supabase project after Prerequisites.** Every subsequent migration, RLS policy, and Studio config change lands on `dchurjcpgzuoyunjsokl`. Future planning should NOT introduce a separate "dev" project unless there's a hard reason — the lessons.md rule chose consolidation deliberately.
 
 ## Prerequisites (operational — do before Phase 1)
@@ -428,34 +429,34 @@ This is the project's first migration. Going forward:
 
 #### Automated
 
-- [x] 1.1 `ls supabase/migrations/*_groups_and_members.sql` returns the file
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run typecheck` passes
-- [x] 1.4 `npm run build` passes
+- [x] 1.1 `ls supabase/migrations/*_groups_and_members.sql` returns the file — 6993016
+- [x] 1.2 `npm run lint` passes — 6993016
+- [x] 1.3 `npm run typecheck` passes — 6993016
+- [x] 1.4 `npm run build` passes — 6993016
 
 #### Manual
 
-- [x] 1.5 Supabase Studio for `dchurjcpgzuoyunjsokl` → Database → Tables shows `public.groups` and `public.group_members` with the expected columns + types + constraints
-- [x] 1.6 Studio → Authentication → Policies shows the six policies on the two tables
-- [x] 1.7 Studio SQL editor: `select public.is_group_member('00000000-0000-0000-0000-000000000000'::uuid)` returns `false`
-- [x] 1.8 SQL editor smoke: insert a test group + self-membership row as an authed user; verify SELECT returns the row; cleanup. **Adapted at impl time**: Studio's SQL editor runs as the `postgres` superuser, so `auth.uid()` returns NULL. Inserting with `auth.uid()` triggered `null value in column "created_by" violates not-null constraint` — POSITIVE signal that the NOT NULL constraint fires. Full RLS-correctness verification deferred to Phase 3 manual 3.15 (browser path) + 3.16 (REST-curl path), where real authenticated users hit the policies.
+- [x] 1.5 Supabase Studio for `dchurjcpgzuoyunjsokl` → Database → Tables shows `public.groups` and `public.group_members` with the expected columns + types + constraints — 6993016
+- [x] 1.6 Studio → Authentication → Policies shows the six policies on the two tables — 6993016
+- [x] 1.7 Studio SQL editor: `select public.is_group_member('00000000-0000-0000-0000-000000000000'::uuid)` returns `false` — 6993016
+- [x] 1.8 SQL editor smoke: insert a test group + self-membership row as an authed user; verify SELECT returns the row; cleanup. **Adapted at impl time**: Studio's SQL editor runs as the `postgres` superuser, so `auth.uid()` returns NULL. Inserting with `auth.uid()` triggered `null value in column "created_by" violates not-null constraint` — POSITIVE signal that the NOT NULL constraint fires. Full RLS-correctness verification deferred to Phase 3 manual 3.15 (browser path) + 3.16 (REST-curl path), where real authenticated users hit the policies. — 6993016
 
 ### Phase 2: Server endpoints + OAuth `?next=` extension
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npm run typecheck` passes
-- [ ] 2.3 `npm run build` passes
-- [ ] 2.4 All five new/modified files exist (`src/pages/api/groups/index.ts`, `src/pages/api/groups/[id]/regenerate-invite.ts`, `src/pages/invite/[token].astro`, `src/lib/supabase-admin.ts`, plus diffs in `src/pages/api/auth/oauth/google.ts` + `src/pages/auth/callback.ts`)
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npm run typecheck` passes
+- [x] 2.3 `npm run build` passes
+- [x] 2.4 All five new/modified files exist (`src/pages/api/groups/index.ts`, `src/pages/api/groups/[id]/regenerate-invite.ts`, `src/pages/invite/[token].astro`, `src/lib/supabase-admin.ts`, plus diffs in `src/pages/api/auth/oauth/google.ts` + `src/pages/auth/callback.ts`)
 
 #### Manual
 
-- [ ] 2.5 Sign in on localhost; create a test group via SQL editor (or leave from Phase 1); note `invite_token`
-- [ ] 2.6 Visit `/invite/<token>` as the same signed-in user → land on `/groups/<id>`; idempotent on re-visit
-- [ ] 2.7 Sign out; visit invite link anonymously → see "Continue with Google to join '<name>'" CTA; OAuth round-trip returns to `/invite/<token>` then `/groups/<id>` signed in
-- [ ] 2.8 `curl -X POST localhost:4321/api/auth/oauth/google -d 'next=https://evil.example.com'` → Supabase redirect URL does NOT contain `evil.example.com` (open-redirect validation)
-- [ ] 2.9 Query-string-merge verification (lessons.md rule #1): during the anonymous-invite OAuth round-trip from 2.7, inspect the URL the browser lands on after Google consent. It MUST contain BOTH `next=/invite/<token>` AND `code=<…>` as distinct query parameters joined by `&` (e.g. `?next=…&code=…&type=…`). If Supabase mishandles the merge (`?next=…?code=…` or `next` missing), the `?next=` thread-through is broken — fall back to a short-lived cookie-based hand-off (set `pending_invite_token=<token>` cookie in `/api/auth/oauth/google` for ~5 min, read + clear it in `/auth/callback`, redirect to `/invite/<token>` if set). The fallback path stays out of code until/unless this verification fails.
+- [x] 2.5 Sign in on localhost; create a test group via SQL editor (or leave from Phase 1); note `invite_token`. Used: name="Test Crew", invite_token=`ef1d7abd-985d-42a9-8edf-534df2ec7d3e`.
+- [x] 2.6 Visit `/invite/<token>` as the same signed-in user → land on `/groups/<id>`; idempotent on re-visit. (First-pass detour: wrong token in URL → "Invite not found" page rendered correctly — proves lookup path. Correct URL → membership inserted, redirect to `/groups/<id>` which 404s pre-Phase-3 as expected.)
+- [x] 2.7 Sign out; visit invite link anonymously → see "Continue with Google to join '<name>'" CTA; OAuth round-trip returns to `/invite/<token>` then `/groups/<id>` signed in. **Required the cookie-fallback adaptation from 2.9 before working.** Also required browser-cookie clear to flush stale PKCE state from the failed first attempt.
+- [x] 2.8 `curl -X POST localhost:4321/api/auth/oauth/google -d 'next=https://evil.example.com'` → Supabase redirect URL does NOT contain `evil.example.com` (open-redirect validation). Astro CSRF gate 403s a plain curl pre-route (same as F-01 1.10); same-origin curl (with `-H 'Origin: http://localhost:4321'`) confirms the route's URL-parse validator rejects the cross-origin path — Location header's `redirect_to=http%3A%2F%2Flocalhost%3A4321%2Fauth%2Fcallback` (no `next=`), Set-Cookie carries only Supabase's PKCE verifier (no `pending_oauth_next`).
+- [x] 2.9 Query-string-merge verification (lessons.md rule #1): during the anonymous-invite OAuth round-trip from 2.7, inspect the URL the browser lands on after Google consent. It MUST contain BOTH `next=/invite/<token>` AND `code=<…>` as distinct query parameters joined by `&` (e.g. `?next=…&code=…&type=…`). If Supabase mishandles the merge (`?next=…?code=…` or `next` missing), the `?next=` thread-through is broken — fall back to a short-lived cookie-based hand-off (set `pending_invite_token=<token>` cookie in `/api/auth/oauth/google` for ~5 min, read + clear it in `/auth/callback`, redirect to `/invite/<token>` if set). The fallback path stays out of code until/unless this verification fails. **VERIFICATION SURFACED THE PREDICTED FAILURE**: Supabase rejected the `?next=`-bearing `redirectTo` (allowlist matching includes query strings; no wildcard entry matches `?next=<any>`), fell back to Site URL, browser landed on `https://10xdevs-lilac.vercel.app/?code=…` (PROD URL at root, NOT localhost callback). Lessons rule #1 verification PAID OFF — implemented the documented cookie fallback (`pending_oauth_next` cookie, HttpOnly + SameSite=Lax + 5-min maxAge + Secure-in-prod). Round-trip now lands cleanly on `http://localhost:4321/auth/callback?code=…` and redirects to `/invite/<token>` → `/groups/<id>`.
 
 ### Phase 3: UI pages + nav update
 

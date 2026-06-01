@@ -1,0 +1,95 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+const { token } = Astro.params;
+
+if (!token) {
+  return Astro.redirect(`/groups?error=${encodeURIComponent("Missing invite token")}`, 302);
+}
+
+// Lookup the group by invite_token using the service-role client.
+// RLS on `groups` would hide it from anonymous visitors otherwise, but we need
+// to know whether the token is valid before sending the user through OAuth.
+const admin = createAdminClient();
+let group: { id: string; name: string } | null = null;
+let lookupError: string | null = null;
+
+if (!admin) {
+  lookupError = "Supabase admin client is not configured";
+} else {
+  const { data, error } = await admin.from("groups").select("id, name").eq("invite_token", token).maybeSingle();
+  if (error) {
+    lookupError = error.message;
+  } else {
+    group = data;
+  }
+}
+
+const user = Astro.locals.user;
+
+// Authed visitor: insert membership (idempotent via composite PK) and redirect to the group.
+if (group && user) {
+  const supabase = createClient(Astro.request.headers, Astro.cookies);
+  if (supabase) {
+    const { error } = await supabase
+      .from("group_members")
+      .upsert({ group_id: group.id, user_id: user.id }, { onConflict: "group_id,user_id", ignoreDuplicates: true });
+    if (error) {
+      return Astro.redirect(`/groups?error=${encodeURIComponent(error.message)}`, 302);
+    }
+    return Astro.redirect(`/groups/${group.id}`, 302);
+  }
+}
+---
+
+<Layout title={group ? `Join "${group.name}"` : "Invite"}>
+  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+      {
+        !group && (
+          <>
+            <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
+              Invite not found
+            </h1>
+            <p class="mb-4 text-center text-sm text-blue-100/70">This invite link is invalid or has been revoked.</p>
+            {lookupError && (
+              <p
+                role="alert"
+                class="mb-4 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+              >
+                <span aria-hidden="true" class="font-bold">
+                  !
+                </span>
+                <span>{lookupError}</span>
+              </p>
+            )}
+            <a href="/" class="block text-center text-sm text-purple-300 hover:underline">
+              Go home
+            </a>
+          </>
+        )
+      }
+      {
+        group && !user && (
+          <>
+            <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
+              Join "{group.name}"
+            </h1>
+            <p class="mb-6 text-center text-sm text-blue-100/70">Sign in to accept this invite.</p>
+            <form method="POST" action="/api/auth/oauth/google">
+              <input type="hidden" name="next" value={`/invite/${token}`} />
+              <button
+                type="submit"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+              >
+                Continue with Google
+              </button>
+            </form>
+          </>
+        )
+      }
+    </div>
+  </div>
+</Layout>

@@ -65,6 +65,11 @@ const astroConfig = tseslint.config({
     "astro/no-set-html-directive": "error",
     "astro/no-unused-css-selector": "warn",
     "astro/prefer-class-list-directive": "warn",
+    // @typescript-eslint/no-misused-promises crashes on early-return-from-frontmatter
+    // patterns in Astro pages (plugin bug: astro-eslint-parser doesn't supply the parent
+    // links the rule expects, and the crash happens before directive comments are read).
+    // Disable for *.astro only — *.ts/*.tsx files still get the rule via baseConfig.
+    "@typescript-eslint/no-misused-promises": "off",
   },
 });
 
