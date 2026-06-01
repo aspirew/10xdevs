@@ -469,23 +469,23 @@ This is the project's first migration. Going forward:
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes
-- [x] 3.2 `npm run typecheck` passes
-- [x] 3.3 `npm run build` passes
-- [x] 3.4 `src/components/ui/{card,input,label}.tsx` exist
-- [x] 3.5 `src/pages/groups/{index,new,[id]}.astro` exist
-- [x] 3.6 `src/pages/dashboard.astro` does NOT exist
-- [x] 3.7 `src/middleware.ts` `PROTECTED_ROUTES` includes `/groups`
+- [x] 3.1 `npm run lint` passes — 99412bb
+- [x] 3.2 `npm run typecheck` passes — 99412bb
+- [x] 3.3 `npm run build` passes — 99412bb
+- [x] 3.4 `src/components/ui/{card,input,label}.tsx` exist — 99412bb
+- [x] 3.5 `src/pages/groups/{index,new,[id]}.astro` exist — 99412bb
+- [x] 3.6 `src/pages/dashboard.astro` does NOT exist — 99412bb
+- [x] 3.7 `src/middleware.ts` `PROTECTED_ROUTES` includes `/groups` — 99412bb
 
 #### Manual
 
-- [x] 3.8 Sign in fresh → land on `/groups` (not `/`, not `/dashboard`)
-- [x] 3.9 Create "Test Crew" via `/groups/new` → land on `/groups/<id>` with one member, invite link displayed; copy the invite link to the clipboard. **Required Path-3 platform-workaround refactor before working** (see Critical Implementation Details addendum below). First-pass failed with PostgreSQL RLS `42501` because PostgREST in this project does not validate ES256/asymmetric JWTs (verified via JWT-claim decode + direct fetch + apikey swap — all returned 403). Refactored every group-touching DB call to use the admin (service-role) client with middleware-verified `locals.user` as the auth gate; RLS policies in the migration remain as defense-in-depth but are not the operative gate.
-- [x] 3.10 Open invite URL in incognito → "Continue with Google to join 'Test Crew'" → consent with a different Google account → land on `/groups/<id>` as the new member; member count = 2
-- [x] 3.11 Reload from creator's session → see two members
-- [x] 3.12 Regenerate invite (as creator) → previous URL returns "Invite not found" in incognito
-- [x] 3.13 Topbar shows "Groups" link; `/dashboard` returns 404
-- [x] 3.14 Sign out from `/groups` → redirects to `/auth/signin`
-- [x] 3.15 RLS sanity (browser path): from a second Google account NOT invited, navigating to `/groups/<id>` directly returns 404 / "Group not found". Note: this now exercises the **app-layer** membership check in `/groups/[id].astro` (the operative gate post-Path-3 refactor), not the RLS USING policy.
-- [x] 3.16 RLS sanity (REST path): curl Supabase `/rest/v1/groups?id=eq.<id>` with the second user's JWT + anon-key headers → returns `[]` (validates the actual RLS boundary, not the app's 404 projection). With auth.uid() returning NULL the user appears as anon to PostgREST, so the SELECT policy's `using (public.is_group_member(id))` evaluates `is_group_member(id) = exists(... where user_id = NULL) = false` → empty result. Defense-in-depth still holds at the REST layer.
-- [ ] 3.17 Repeat happy path on prod (`https://10xdevs-lilac.vercel.app`); tag prod deploy `prod-2026-MM-DD-1`
+- [x] 3.8 Sign in fresh → land on `/groups` (not `/`, not `/dashboard`) — 99412bb
+- [x] 3.9 Create "Test Crew" via `/groups/new` → land on `/groups/<id>` with one member, invite link displayed; copy the invite link to the clipboard. **Required Path-3 platform-workaround refactor before working** (see Critical Implementation Details addendum below). First-pass failed with PostgreSQL RLS `42501` because PostgREST in this project does not validate ES256/asymmetric JWTs (verified via JWT-claim decode + direct fetch + apikey swap — all returned 403). Refactored every group-touching DB call to use the admin (service-role) client with middleware-verified `locals.user` as the auth gate; RLS policies in the migration remain as defense-in-depth but are not the operative gate. — 99412bb
+- [x] 3.10 Open invite URL in incognito → "Continue with Google to join 'Test Crew'" → consent with a different Google account → land on `/groups/<id>` as the new member; member count = 2 — 99412bb
+- [x] 3.11 Reload from creator's session → see two members — 99412bb
+- [x] 3.12 Regenerate invite (as creator) → previous URL returns "Invite not found" in incognito — 99412bb
+- [x] 3.13 Topbar shows "Groups" link; `/dashboard` returns 404 — 99412bb
+- [x] 3.14 Sign out from `/groups` → redirects to `/auth/signin` — 99412bb
+- [x] 3.15 RLS sanity (browser path): from a second Google account NOT invited, navigating to `/groups/<id>` directly returns 404 / "Group not found". Note: this now exercises the **app-layer** membership check in `/groups/[id].astro` (the operative gate post-Path-3 refactor), not the RLS USING policy. — 99412bb
+- [x] 3.16 RLS sanity (REST path): curl Supabase `/rest/v1/groups?id=eq.<id>` with the second user's JWT + anon-key headers → returns `[]` (validates the actual RLS boundary, not the app's 404 projection). With auth.uid() returning NULL the user appears as anon to PostgREST, so the SELECT policy's `using (public.is_group_member(id))` evaluates `is_group_member(id) = exists(... where user_id = NULL) = false` → empty result. Defense-in-depth still holds at the REST layer. — 99412bb
+- [x] 3.17 Repeat happy path on prod (`https://10xdevs-lilac.vercel.app`); tag prod deploy `prod-2026-MM-DD-1`. Tagged `prod-2026-06-02-1` on commit `99412bb` (continues the prod-YYYY-MM-DD-N series; prod-2026-05-27-1/-2/-3 were F-01 tags). Same Path-3 workaround applies on prod (same Supabase project = same broken PostgREST). — 99412bb
