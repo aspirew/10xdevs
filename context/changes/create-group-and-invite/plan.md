@@ -428,17 +428,17 @@ This is the project's first migration. Going forward:
 
 #### Automated
 
-- [ ] 1.1 `ls supabase/migrations/*_groups_and_members.sql` returns the file
-- [ ] 1.2 `npm run lint` passes
-- [ ] 1.3 `npm run typecheck` passes
-- [ ] 1.4 `npm run build` passes
+- [x] 1.1 `ls supabase/migrations/*_groups_and_members.sql` returns the file
+- [x] 1.2 `npm run lint` passes
+- [x] 1.3 `npm run typecheck` passes
+- [x] 1.4 `npm run build` passes
 
 #### Manual
 
-- [ ] 1.5 Supabase Studio for `dchurjcpgzuoyunjsokl` → Database → Tables shows `public.groups` and `public.group_members` with the expected columns + types + constraints
-- [ ] 1.6 Studio → Authentication → Policies shows the six policies on the two tables
-- [ ] 1.7 Studio SQL editor: `select public.is_group_member('00000000-0000-0000-0000-000000000000'::uuid)` returns `false`
-- [ ] 1.8 SQL editor smoke: insert a test group + self-membership row as an authed user; verify SELECT returns the row; cleanup
+- [x] 1.5 Supabase Studio for `dchurjcpgzuoyunjsokl` → Database → Tables shows `public.groups` and `public.group_members` with the expected columns + types + constraints
+- [x] 1.6 Studio → Authentication → Policies shows the six policies on the two tables
+- [x] 1.7 Studio SQL editor: `select public.is_group_member('00000000-0000-0000-0000-000000000000'::uuid)` returns `false`
+- [x] 1.8 SQL editor smoke: insert a test group + self-membership row as an authed user; verify SELECT returns the row; cleanup. **Adapted at impl time**: Studio's SQL editor runs as the `postgres` superuser, so `auth.uid()` returns NULL. Inserting with `auth.uid()` triggered `null value in column "created_by" violates not-null constraint` — POSITIVE signal that the NOT NULL constraint fires. Full RLS-correctness verification deferred to Phase 3 manual 3.15 (browser path) + 3.16 (REST-curl path), where real authenticated users hit the policies.
 
 ### Phase 2: Server endpoints + OAuth `?next=` extension
 

@@ -20,6 +20,10 @@ pnpm-debug.log*
 # vercel
 .vercel/
 
+# supabase CLI local state (tokens, project-link, temp)
+.supabase/
+supabase/.temp/
+
 # macOS-specific files
 .DS_Store
 
