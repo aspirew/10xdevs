@@ -84,7 +84,9 @@ const endStr = formatDate(addDays(today, 27));
 let calendarInitial: AvailabilityWindow | null = null;
 if (group && admin) {
   try {
-    calendarInitial = await getAvailabilityWindow(admin, group.id, startStr, endStr);
+    // Pass memberIds.length so the helper skips its own COUNT query — we already
+    // have the size from the member-list pull above.
+    calendarInitial = await getAvailabilityWindow(admin, group.id, user.id, startStr, endStr, memberIds.length);
   } catch {
     // Non-fatal: render the page without the calendar island if the read fails.
     // (Calendar simply won't render; user sees Members + Invite as before.)
@@ -190,13 +192,7 @@ if (group && admin) {
             </div>
 
             {calendarInitial && (
-              <GroupCalendar
-                client:load
-                groupId={group.id}
-                userId={user.id}
-                initial={calendarInitial}
-                initialStart={startStr}
-              />
+              <GroupCalendar client:load groupId={group.id} initial={calendarInitial} initialStart={startStr} />
             )}
 
             <p class="text-center text-sm text-blue-100/60">

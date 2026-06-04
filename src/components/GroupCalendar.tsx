@@ -9,7 +9,6 @@ void React;
 
 interface Props {
   groupId: string;
-  userId: string;
   initial: AvailabilityWindow;
   initialStart: string;
 }
@@ -27,7 +26,7 @@ const VISIBLE_HOUR_END = 24;
 // surfaces "from what hour onward does most of the group overlap?" — overlap count at
 // (date, hour) = members whose start_hour <= hour on that date.
 
-export default function GroupCalendar({ groupId, userId, initial, initialStart }: Props) {
+export default function GroupCalendar({ groupId, initial, initialStart }: Props) {
   const [start, setStart] = useState(initialStart);
   const [data, setData] = useState<AvailabilityWindow>(initial);
   const [loading, setLoading] = useState(false);
@@ -36,23 +35,23 @@ export default function GroupCalendar({ groupId, userId, initial, initialStart }
   const startDate = parseDate(start);
   const endStr = formatDate(addDays(startDate, WINDOW_DAYS - 1));
 
-  // Per-date map of user_id → start_hour, derived from raw marks for fast lookup.
-  const byDate = new Map<string, Map<string, number>>();
-  for (const m of data.marks) {
-    let perDate = byDate.get(m.slot_date);
-    if (!perDate) {
-      perDate = new Map<string, number>();
-      byDate.set(m.slot_date, perDate);
-    }
-    perDate.set(m.user_id, m.slot_hour);
+  // Derived lookups. The wire shape gives "mine" vs "others" already split — no
+  // user_ids on the client. We just need fast date-keyed lookups for render.
+  const myStartByDate = new Map<string, number>(data.myMarks.map((m) => [m.slot_date, m.slot_hour]));
+  const othersByDate = new Map<string, number[]>();
+  for (const m of data.othersMarks) {
+    const arr = othersByDate.get(m.slot_date) ?? [];
+    arr.push(m.slot_hour);
+    othersByDate.set(m.slot_date, arr);
   }
 
-  const myStartOn = (date: string): number | undefined => byDate.get(date)?.get(userId);
+  const myStartOn = (date: string): number | undefined => myStartByDate.get(date);
   const countAt = (date: string, hour: number): number => {
-    const perDate = byDate.get(date);
-    if (!perDate) return 0;
     let n = 0;
-    for (const h of perDate.values()) if (h <= hour) n++;
+    const my = myStartByDate.get(date);
+    if (my !== undefined && my <= hour) n++;
+    const others = othersByDate.get(date);
+    if (others) for (const oh of others) if (oh <= hour) n++;
     return n;
   };
 
@@ -80,26 +79,25 @@ export default function GroupCalendar({ groupId, userId, initial, initialStart }
     }
   }
 
-  function applyOptimisticMark(marks: MemberMark[], date: string, hour: number): MemberMark[] {
-    const others = marks.filter((m) => !(m.user_id === userId && m.slot_date === date));
-    return [...others, { user_id: userId, slot_date: date, slot_hour: hour }];
+  function applyOptimisticMark(myMarks: MemberMark[], date: string, hour: number): MemberMark[] {
+    const others = myMarks.filter((m) => m.slot_date !== date);
+    return [...others, { slot_date: date, slot_hour: hour }];
   }
 
-  function applyOptimisticUnmark(marks: MemberMark[], date: string): MemberMark[] {
-    return marks.filter((m) => !(m.user_id === userId && m.slot_date === date));
+  function applyOptimisticUnmark(myMarks: MemberMark[], date: string): MemberMark[] {
+    return myMarks.filter((m) => m.slot_date !== date);
   }
 
   async function toggle(slotDate: string, slotHour: number) {
     if (isPastSlot(slotDate, slotHour)) return;
     const currentStart = myStartOn(slotDate);
     const willUnmark = currentStart === slotHour;
-    const beforeMarks = data.marks;
 
     setData((prev) => ({
       ...prev,
-      marks: willUnmark
-        ? applyOptimisticUnmark(prev.marks, slotDate)
-        : applyOptimisticMark(prev.marks, slotDate, slotHour),
+      myMarks: willUnmark
+        ? applyOptimisticUnmark(prev.myMarks, slotDate)
+        : applyOptimisticMark(prev.myMarks, slotDate, slotHour),
     }));
 
     const endpoint = willUnmark ? "unmark" : "mark";
@@ -117,7 +115,17 @@ export default function GroupCalendar({ groupId, userId, initial, initialStart }
       }
     } catch (e) {
       console.warn(`Failed to ${endpoint} ${slotDate}${willUnmark ? "" : ` @ ${slotHour}`}:`, e);
-      setData((prev) => ({ ...prev, marks: beforeMarks }));
+      // Inverse revert: restore THIS date's pre-toggle state against current marks
+      // (which may include concurrent successful ops on other dates/cells). The
+      // applyOptimistic* helpers are date-scoped — they only touch (slotDate)
+      // entries in myMarks — so this composes correctly without a full-state snapshot.
+      setData((prev) => ({
+        ...prev,
+        myMarks:
+          currentStart === undefined
+            ? applyOptimisticUnmark(prev.myMarks, slotDate)
+            : applyOptimisticMark(prev.myMarks, slotDate, currentStart),
+      }));
       setFailedDates((prev) => {
         const next = new Set(prev);
         next.add(slotDate);
