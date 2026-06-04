@@ -319,34 +319,34 @@ If a future schema change adds `confirmed_session_id` (per S-03), it will be one
 
 #### Automated
 
-- [x] 1.1 Migration file exists at `supabase/migrations/<timestamp>_availability.sql`
-- [x] 1.2 `npx supabase db diff --linked` or Studio `\d availability` shows expected shape
-- [x] 1.3 `npm run typecheck` passes
-- [x] 1.4 `npm run lint` passes
+- [x] 1.1 Migration file exists at `supabase/migrations/<timestamp>_availability.sql` — a3a1a64
+- [x] 1.2 `npx supabase db diff --linked` or Studio `\d availability` shows expected shape — a3a1a64
+- [x] 1.3 `npm run typecheck` passes — a3a1a64
+- [x] 1.4 `npm run lint` passes — a3a1a64
 
 #### Manual
 
-- [x] 1.5 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`
-- [x] 1.6 `\d+ availability` shows the composite FK to `group_members` with ON DELETE CASCADE
-- [x] 1.7 Postgres-role INSERT for a member tuple succeeds; non-member tuple fails with FK violation
-- [x] 1.8 Anonymous publishable-key SELECT on `availability` returns zero rows (RLS denies)
+- [x] 1.5 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl` — a3a1a64
+- [x] 1.6 `\d+ availability` shows the composite FK to `group_members` with ON DELETE CASCADE — a3a1a64
+- [x] 1.7 Postgres-role INSERT for a member tuple succeeds; non-member tuple fails with FK violation — a3a1a64
+- [x] 1.8 Anonymous publishable-key SELECT on `availability` returns zero rows (RLS denies) — a3a1a64
 
 ### Phase 2: Endpoints + Read Helper
 
 #### Automated
 
-- [ ] 2.1 `npm run typecheck` passes
-- [ ] 2.2 `npm run lint` passes
-- [ ] 2.3 Files exist at the four new paths (helper, calendar utils, GET endpoint, mark, unmark)
+- [x] 2.1 `npm run typecheck` passes
+- [x] 2.2 `npm run lint` passes
+- [x] 2.3 Files exist at the four new paths (helper, calendar utils, GET endpoint, mark, unmark)
 
 #### Manual
 
-- [ ] 2.4 Localhost: member-cookie curl POST `.../mark` returns `{ok:true}`; row visible in Studio
-- [ ] 2.5 Repeated mark curl returns `{ok:true}` (idempotent — no duplicate row)
-- [ ] 2.6 Member-cookie curl POST `.../unmark` returns `{ok:true}`; row gone in Studio
-- [ ] 2.7 Member-cookie curl GET `.../availability?start&end` returns expected JSON shape
-- [ ] 2.8 Non-member-cookie curl on any endpoint returns 403
-- [ ] 2.9 Malformed-body mark/unmark returns 400 (no server-side past check; see plan note)
+- [x] 2.4 Localhost: member-cookie curl POST `.../mark` returns `{ok:true}`; row visible in Studio
+- [x] 2.5 Repeated mark curl returns `{ok:true}` (idempotent — no duplicate row)
+- [x] 2.6 Member-cookie curl POST `.../unmark` returns `{ok:true}`; row gone in Studio
+- [x] 2.7 Member-cookie curl GET `.../availability?start&end` returns expected JSON shape
+- [x] 2.8 Non-member-cookie curl on any endpoint returns 403
+- [x] 2.9 Malformed-body mark/unmark returns 400 (no server-side past check; see plan note)
 
 ### Phase 3: Calendar React Island
 
