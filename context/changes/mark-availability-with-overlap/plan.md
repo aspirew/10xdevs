@@ -353,20 +353,20 @@ If a future schema change adds `confirmed_session_id` (per S-03), it will be one
 
 #### Automated
 
-- [x] 3.1 `npm run typecheck` passes
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 `npm run build` succeeds with no warnings about missing components
-- [x] 3.4 No new top-level dependencies added to `package.json`
+- [x] 3.1 `npm run typecheck` passes — c14d927
+- [x] 3.2 `npm run lint` passes — c14d927
+- [x] 3.3 `npm run build` succeeds with no warnings about missing components — c14d927
+- [x] 3.4 No new top-level dependencies added to `package.json` — c14d927
 
 #### Manual
 
-- [x] 3.5 Localhost: signed in as member, `/groups/<id>` shows calendar below Invite
-- [x] 3.6 Tap-to-mark: cell flips visually within ~16ms; POST .../mark → 200; persists across reload
-- [x] 3.7 Tap-to-unmark: cell reverts; POST .../unmark → 200; persists across reload
-- [x] 3.8 Two-account: second member sees first member's marks after reload/nav; count aggregates correctly
-- [x] 3.9 Threshold highlight: at boundary `ceil(group_size × 2/3)` cells visually emphasized; below not
-- [x] 3.10 Prev/Next/Today nav: grid updates without full reload; smooth transition
-- [x] 3.11 Past-slot cells: 50% opacity, tap does nothing (no network request)
-- [ ] 3.12 iOS Safari + Android Chrome smoke on a real phone: grid usable
-- [ ] 3.13 Production smoke at `https://10xdevs-lilac.vercel.app` with two real Google accounts
-- [ ] 3.14 Tag production deploy as `prod-<date>-s02` after success
+- [x] 3.5 Localhost: signed in as member, `/groups/<id>` shows calendar below Invite — c14d927
+- [x] 3.6 Tap-to-mark: cell flips visually within ~16ms; POST .../mark → 200; persists across reload — c14d927
+- [x] 3.7 Tap-to-unmark: cell reverts; POST .../unmark → 200; persists across reload — c14d927
+- [x] 3.8 Two-account: second member sees first member's marks after reload/nav; count aggregates correctly — c14d927
+- [x] 3.9 Threshold highlight: at boundary `ceil(group_size × 2/3)` cells visually emphasized; below not — c14d927
+- [x] 3.10 Prev/Next/Today nav: grid updates without full reload; smooth transition — c14d927
+- [x] 3.11 Past-slot cells: 50% opacity, tap does nothing (no network request) — c14d927
+- [x] 3.12 iOS Safari + Android Chrome smoke on a real phone: grid usable — c14d927
+- [x] 3.13 Production smoke at `https://10xdevs-lilac.vercel.app` with two real Google accounts — c14d927
+- [x] 3.14 Tag production deploy as `prod-<date>-s02` after success — c14d927

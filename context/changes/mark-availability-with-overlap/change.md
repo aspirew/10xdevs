@@ -1,7 +1,7 @@
 ---
 change_id: mark-availability-with-overlap
 title: Mark availability and surface group overlap on the calendar
-status: implementing
+status: implemented
 created: 2026-06-04
 updated: 2026-06-04
 archived_at: null
