@@ -31,3 +31,13 @@
 **Rule**: When a Marketplace integration is installed and the repo also has a pre-existing `.env` for the same service, do an explicit *resource identity reconciliation* before relying on either: log the resource URL/ID from `.env`, log the URL/ID Vercel injects (`vercel env pull` to a temp file + diff), and either (a) point local `.env` at the Vercel-bound resource (delete the stale one) or (b) document the two-resource setup explicitly in `infrastructure.md` / `deploy-plan.md`. Any /10x-plan touching an integration-bound service surface must call out *which* resource — dev's, prod's, or both — and verify access to each.
 
 **Applies to**: research, plan, plan-review, implement, impl-review
+
+## Apply Supabase migrations via the CLI, never the Studio SQL editor on this project
+
+**Context**: Any `/10x-plan` step that introduces a SQL migration on this Supabase project (`dchurjcpgzuoyunjsokl`, the Vercel-bound, asymmetric-JWT project), OR any `/10x-implement` step that needs to apply a migration to the linked remote. Triggered by both S-01's plan and S-02 v1's plan defaulting to "apply via Supabase Studio SQL editor" in their Phase 1 Manual Verification — corrected mid-implement on 2026-06-04.
+
+**Problem**: Studio paste decouples the local `supabase/migrations/` directory from remote state — the CLI no longer knows whether a migration listed locally has been applied remotely, `npx supabase db diff --linked` reports phantom drift, and any future `npx supabase migration up` or `db push` either fails ("already exists") or duplicates work. It also breaks the contract a tracked migration directory is supposed to give: that `git log -- supabase/migrations/` is the audit trail of what was applied. The project is linked (`supabase/.temp/linked-project.json` present, `project-ref` = `dchurjcpgzuoyunjsokl`); the CLI is in devDeps; there is no reason to paste into Studio.
+
+**Rule**: For schema migrations on this Supabase project, apply via `npx supabase db push --linked` (or `npx supabase migration up --linked` once the migration is reconciled). Never paste migration SQL into the Studio SQL editor. Plan Phase verification steps must say "apply via CLI" and include the exact command. Studio is reserved for read-only inspection (`\d`, `SELECT`, RLS-as-anon smoke tests) and for one-off **smoke test** writes that are explicitly rolled back — never for landing migrations.
+
+**Applies to**: plan, plan-review, implement, impl-review
