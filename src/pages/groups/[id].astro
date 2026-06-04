@@ -1,7 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
+import GroupCalendar from "@/components/GroupCalendar";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { getAvailabilityWindow, type AvailabilityWindow } from "@/lib/availability";
+import { addDays, formatDate } from "@/lib/calendar";
 
 const user = Astro.locals.user;
 if (!user) {
@@ -71,6 +74,22 @@ if (group && admin && memberIds.length > 0) {
 
 const inviteUrl = group ? `${Astro.url.origin}/invite/${group.invite_token}` : null;
 const isCreator = group?.created_by === user.id;
+
+// Initial 4-week availability window for the React calendar island.
+// JS-level membership check above already gated; we can safely call the helper here
+// with the admin client. (RLS isn't the gate on this project — see lessons.md.)
+const today = new Date();
+const startStr = formatDate(today);
+const endStr = formatDate(addDays(today, 27));
+let calendarInitial: AvailabilityWindow | null = null;
+if (group && admin) {
+  try {
+    calendarInitial = await getAvailabilityWindow(admin, group.id, startStr, endStr);
+  } catch {
+    // Non-fatal: render the page without the calendar island if the read fails.
+    // (Calendar simply won't render; user sees Members + Invite as before.)
+  }
+}
 ---
 
 <Layout title={group ? group.name : "Group"}>
@@ -169,6 +188,16 @@ const isCreator = group?.created_by === user.id;
                 </form>
               )}
             </div>
+
+            {calendarInitial && (
+              <GroupCalendar
+                client:load
+                groupId={group.id}
+                userId={user.id}
+                initial={calendarInitial}
+                initialStart={startStr}
+              />
+            )}
 
             <p class="text-center text-sm text-blue-100/60">
               <a href="/groups" class="text-purple-300 hover:underline">

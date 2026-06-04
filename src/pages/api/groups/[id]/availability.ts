@@ -37,7 +37,7 @@ export const GET: APIRoute = async (context) => {
   if (!membership) return json(403, { error: "Not a member of this group" });
 
   try {
-    const data = await getAvailabilityWindow(admin, id, user.id, start, end);
+    const data = await getAvailabilityWindow(admin, id, start, end);
     return json(200, data);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Query failed";

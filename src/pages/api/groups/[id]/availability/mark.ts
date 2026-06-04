@@ -4,10 +4,9 @@ import { createAdminClient } from "@/lib/supabase-admin";
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-// JSON POST mark. Idempotent via upsert+ignoreDuplicates on the composite PK.
-// NO server-side past-slot validation — UI is the gate (Postgres + Vercel run UTC;
-// user is in browser-local TZ; "past" cannot be computed correctly here). See plan.md
-// "Past-slot boundary (UI-only)".
+// JSON POST mark. Start-hour semantic: at most one mark per (group, user, slot_date).
+// Tapping a different hour on a day where the user is already marked REPLACES the prior
+// start time (onConflict update). No server-side past-slot validation — UI is the gate.
 export const POST: APIRoute = async (context) => {
   const user = context.locals.user;
   if (!user) return json(401, { error: "Not authenticated" });
@@ -41,12 +40,11 @@ export const POST: APIRoute = async (context) => {
     .maybeSingle();
   if (!membership) return json(403, { error: "Not a member of this group" });
 
+  // Upsert with replace-on-conflict at the (group_id, user_id, slot_date) PK: tapping
+  // a new hour on a day where the user is already marked re-points the start.
   const { error } = await admin
     .from("availability")
-    .upsert(
-      { group_id: id, user_id: user.id, slot_date, slot_hour },
-      { onConflict: "group_id,user_id,slot_date,slot_hour", ignoreDuplicates: true },
-    );
+    .upsert({ group_id: id, user_id: user.id, slot_date, slot_hour }, { onConflict: "group_id,user_id,slot_date" });
   if (error) return json(500, { error: error.message });
 
   return json(200, { ok: true });

@@ -52,6 +52,7 @@ The app-layer auth pattern is non-negotiable: every endpoint and the server-rend
 - **Past-slot boundary (UI-only).** "Past" = `slot_date < today` OR (`slot_date = today` AND `slot_hour < currentHour`), computed in the browser using local `Date`. The UI renders past cells at 50% opacity and ignores taps. Server-side mutation endpoints do **not** validate past-ness: Supabase Postgres + Vercel functions run in UTC, but the user is in their browser-local TZ (PRD §Access Control locks "single TZ per group" but does not store one). Trying to enforce past in the server would be wrong by the UTC offset and would reject legitimate user actions near midnight. Accepted v1 trade: the UI is the gate; a curl-wielder marking past slots is silly and harmless (the row sits in `availability`, doesn't affect anyone else's overlap counts for future slots). RLS policies still exist as defense-in-depth on direct PostgREST traffic.
 - **Optimistic UI revert.** Tap-to-toggle updates the React state immediately and POSTs in the background. On a non-2xx response: revert the cell's state to its pre-tap value, briefly tint the cell with a red ring for ~2s (Tailwind: `ring-2 ring-red-500` toggled via a per-cell `failedAt` timestamp in state, cleared after 2s), and `console.warn(error.message)` for developer visibility. No toast component install — matches the inline error treatment at `src/pages/groups/[id].astro:88-98`. This is the only place in the plan where ordering matters.
 - **Membership check shape (lessons.md #2 follow-on).** Every admin-client query that reads or writes group-scoped data MUST do an explicit JS-level membership check against `group_members` BEFORE the read/write. Do NOT use the `is_group_member()` SQL helper from admin paths — it calls `auth.uid()` which returns NULL under service-role JWT, so the helper returns false unconditionally and the query yields zero rows. The RLS policies on `availability` keep referencing the helper because their job is to deny direct PostgREST anonymous traffic, where there's no user identity anyway.
+- **Start-hour semantic (corrected mid-Phase-3, 2026-06-04).** PRD FR-006 ("day + start-hour slot") + §Business Logic intent: ONE mark per member per day, with availability lasting from `slot_hour` to end-of-day. Overlap at any (date, hour) cell = members whose `start_hour ≤ hour` on that date — cumulative, not exact-match. Phase 1's original PK `(group_id, user_id, slot_date, slot_hour)` modeled exact-match instead and was corrected by migration `20260604190001_availability_start_hour_semantic.sql` (PK → `(group_id, user_id, slot_date)`; test-only data truncated). Mark endpoint = upsert replace-on-conflict by date; unmark endpoint = delete by `(group_id, user_id, slot_date)` (`slot_hour` not part of the where clause). UI toggle: tap unmarked → mark as start; tap your own start → unmark for the day; tap a different hour on a marked day → move start. Visual color separation: **blue = YOU** (your start + your range to end-of-day), **purple = GROUP overlap met** (FR-008 wedge signal). S-03 must read this section before referencing the table — the load-bearing semantic differs from the original Phase 1 contract above.
 
 ## Phase 1: Schema + RLS Migration
 
@@ -335,37 +336,37 @@ If a future schema change adds `confirmed_session_id` (per S-03), it will be one
 
 #### Automated
 
-- [x] 2.1 `npm run typecheck` passes
-- [x] 2.2 `npm run lint` passes
-- [x] 2.3 Files exist at the four new paths (helper, calendar utils, GET endpoint, mark, unmark)
+- [x] 2.1 `npm run typecheck` passes — 3a5f7d6
+- [x] 2.2 `npm run lint` passes — 3a5f7d6
+- [x] 2.3 Files exist at the four new paths (helper, calendar utils, GET endpoint, mark, unmark) — 3a5f7d6
 
 #### Manual
 
-- [x] 2.4 Localhost: member-cookie curl POST `.../mark` returns `{ok:true}`; row visible in Studio
-- [x] 2.5 Repeated mark curl returns `{ok:true}` (idempotent — no duplicate row)
-- [x] 2.6 Member-cookie curl POST `.../unmark` returns `{ok:true}`; row gone in Studio
-- [x] 2.7 Member-cookie curl GET `.../availability?start&end` returns expected JSON shape
-- [x] 2.8 Non-member-cookie curl on any endpoint returns 403
-- [x] 2.9 Malformed-body mark/unmark returns 400 (no server-side past check; see plan note)
+- [x] 2.4 Localhost: member-cookie curl POST `.../mark` returns `{ok:true}`; row visible in Studio — 3a5f7d6
+- [x] 2.5 Repeated mark curl returns `{ok:true}` (idempotent — no duplicate row) — 3a5f7d6
+- [x] 2.6 Member-cookie curl POST `.../unmark` returns `{ok:true}`; row gone in Studio — 3a5f7d6
+- [x] 2.7 Member-cookie curl GET `.../availability?start&end` returns expected JSON shape — 3a5f7d6
+- [x] 2.8 Non-member-cookie curl on any endpoint returns 403 — 3a5f7d6
+- [x] 2.9 Malformed-body mark/unmark returns 400 (no server-side past check; see plan note) — 3a5f7d6
 
 ### Phase 3: Calendar React Island
 
 #### Automated
 
-- [ ] 3.1 `npm run typecheck` passes
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `npm run build` succeeds with no warnings about missing components
-- [ ] 3.4 No new top-level dependencies added to `package.json`
+- [x] 3.1 `npm run typecheck` passes
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `npm run build` succeeds with no warnings about missing components
+- [x] 3.4 No new top-level dependencies added to `package.json`
 
 #### Manual
 
-- [ ] 3.5 Localhost: signed in as member, `/groups/<id>` shows calendar below Invite
-- [ ] 3.6 Tap-to-mark: cell flips visually within ~16ms; POST .../mark → 200; persists across reload
-- [ ] 3.7 Tap-to-unmark: cell reverts; POST .../unmark → 200; persists across reload
-- [ ] 3.8 Two-account: second member sees first member's marks after reload/nav; count aggregates correctly
-- [ ] 3.9 Threshold highlight: at boundary `ceil(group_size × 2/3)` cells visually emphasized; below not
-- [ ] 3.10 Prev/Next/Today nav: grid updates without full reload; smooth transition
-- [ ] 3.11 Past-slot cells: 50% opacity, tap does nothing (no network request)
+- [x] 3.5 Localhost: signed in as member, `/groups/<id>` shows calendar below Invite
+- [x] 3.6 Tap-to-mark: cell flips visually within ~16ms; POST .../mark → 200; persists across reload
+- [x] 3.7 Tap-to-unmark: cell reverts; POST .../unmark → 200; persists across reload
+- [x] 3.8 Two-account: second member sees first member's marks after reload/nav; count aggregates correctly
+- [x] 3.9 Threshold highlight: at boundary `ceil(group_size × 2/3)` cells visually emphasized; below not
+- [x] 3.10 Prev/Next/Today nav: grid updates without full reload; smooth transition
+- [x] 3.11 Past-slot cells: 50% opacity, tap does nothing (no network request)
 - [ ] 3.12 iOS Safari + Android Chrome smoke on a real phone: grid usable
 - [ ] 3.13 Production smoke at `https://10xdevs-lilac.vercel.app` with two real Google accounts
 - [ ] 3.14 Tag production deploy as `prod-<date>-s02` after success

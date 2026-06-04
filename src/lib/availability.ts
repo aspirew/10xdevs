@@ -1,59 +1,39 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export interface AvailabilitySlot {
-  slot_date: string;
-  slot_hour: number;
-  count: number;
-}
+// One row per (group_id, user_id, slot_date) after the start-hour semantic migration.
+// `slot_hour` is the member's START hour for that date — their availability lasts from
+// that hour to end of day. Overlap at any (date, hour) cell = members whose start_hour
+// is <= hour on that date.
 
-export interface MyMark {
+export interface MemberMark {
+  user_id: string;
   slot_date: string;
   slot_hour: number;
 }
 
 export interface AvailabilityWindow {
-  slots: AvailabilitySlot[];
-  myMarks: MyMark[];
+  marks: MemberMark[];
   groupSize: number;
   threshold: number;
 }
 
-// Shared read helper used by both the server-render path in groups/[id].astro and the
-// JSON GET endpoint. Caller MUST verify group membership at the JS layer before invoking;
-// this helper does NOT enforce auth (RLS isn't the gate on this project — see lessons.md
-// "Verify PostgREST honors auth.uid()..."). At v1 friend-group scale (<10 members ×
-// 28 days × 24 hours ≈ 6.7k rows max) the row-pull + JS aggregation is cheaper than
-// shipping a Postgres function for COUNT/GROUP BY.
+// Caller MUST verify group membership at the JS layer before invoking. The helper does
+// not enforce auth (RLS isn't the gate on this project — see lessons.md).
 export async function getAvailabilityWindow(
   admin: SupabaseClient,
   groupId: string,
-  userId: string,
   startDate: string,
   endDate: string,
 ): Promise<AvailabilityWindow> {
   const { data: rows, error: rowsErr } = await admin
     .from("availability")
-    .select("slot_date, slot_hour, user_id")
+    .select("user_id, slot_date, slot_hour")
     .eq("group_id", groupId)
     .gte("slot_date", startDate)
     .lte("slot_date", endDate);
   if (rowsErr) throw rowsErr;
 
-  const countMap = new Map<string, number>();
-  const myMarks: MyMark[] = [];
-  for (const r of rows as { slot_date: string; slot_hour: number; user_id: string }[]) {
-    const key = `${r.slot_date}T${r.slot_hour}`;
-    countMap.set(key, (countMap.get(key) ?? 0) + 1);
-    if (r.user_id === userId) {
-      myMarks.push({ slot_date: r.slot_date, slot_hour: r.slot_hour });
-    }
-  }
-
-  const slots: AvailabilitySlot[] = [];
-  for (const [key, count] of countMap.entries()) {
-    const [slot_date, hourStr] = key.split("T");
-    slots.push({ slot_date, slot_hour: Number(hourStr), count });
-  }
+  const marks = rows as MemberMark[];
 
   const { count: groupSize, error: sizeErr } = await admin
     .from("group_members")
@@ -64,5 +44,5 @@ export async function getAvailabilityWindow(
 
   const threshold = Math.ceil((groupSize * 2) / 3);
 
-  return { slots, myMarks, groupSize, threshold };
+  return { marks, groupSize, threshold };
 }
