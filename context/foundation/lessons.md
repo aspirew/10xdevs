@@ -41,3 +41,13 @@
 **Rule**: For schema migrations on this Supabase project, apply via `npx supabase db push --linked` (or `npx supabase migration up --linked` once the migration is reconciled). Never paste migration SQL into the Studio SQL editor. Plan Phase verification steps must say "apply via CLI" and include the exact command. Studio is reserved for read-only inspection (`\d`, `SELECT`, RLS-as-anon smoke tests) and for one-off **smoke test** writes that are explicitly rolled back — never for landing migrations.
 
 **Applies to**: plan, plan-review, implement, impl-review
+
+## Cap failure_count and prune rows tracking external-endpoint state
+
+**Context**: Any table that persists per-row state for calls out to an external HTTP endpoint (Web Push subscriptions, webhook delivery targets, external OAuth tokens, third-party integrations) where success/failure is stamped back onto the row. F-02's `push_subscriptions` is the seed case: rows have `failure_count`, `last_failure_at`, and only 404/410 responses trigger automatic delete via `sendPushToUser` in `src/lib/push.ts`.
+
+**Problem**: When the external service returns a non-404/non-410 error permanently (400/403/etc.), the row's `failure_count` climbs forever without cleanup. At small user counts this is invisible; as usage scales the table accumulates dead-but-failing rows that (a) waste storage, (b) get retried on every fan-out call, and (c) skew any metrics computed off the alive-row set. F-02's impl-review F5 flagged the gap.
+
+**Rule**: When shipping a table that persists per-row external-endpoint state with a `failure_count` column, define a max-fail threshold at plan time and either (a) prune rows in-line once `failure_count >= N` after a failed send, or (b) run a periodic cleanup job. Don't ship the failure_count column without deciding the prune policy.
+
+**Applies to**: plan, plan-review, impl-review

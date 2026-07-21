@@ -32,7 +32,7 @@ export const POST: APIRoute = async (context) => {
   }
   const p256dh = keys.p256dh;
   const auth = keys.auth;
-  const expiration_time = typeof expirationTime === "number" ? new Date(expirationTime).toISOString() : null;
+  const expiration_time = Number.isFinite(expirationTime) ? new Date(expirationTime as number).toISOString() : null;
 
   const admin = createAdminClient();
   if (!admin) return json(500, { error: "Server misconfigured" });
