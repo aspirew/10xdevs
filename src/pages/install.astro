@@ -1,0 +1,87 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
+import { NotificationControls } from "@/components/NotificationControls";
+
+// Public page — no auth guard. The NotificationControls island itself gates
+// the subscribe button on locals.user (passed as `isSignedIn` prop) and
+// redirects to sign-in when needed. Anonymous visitors still get the
+// per-platform install instructions.
+
+const user = Astro.locals.user;
+const userAgent = Astro.request.headers.get("user-agent") ?? "";
+const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+const isAndroid = /Android/i.test(userAgent);
+const platform: "ios" | "android" | "desktop" = isIOS ? "ios" : isAndroid ? "android" : "desktop";
+---
+
+<Layout title="Install GameSlot">
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <div class="mx-auto max-w-2xl">
+      <Topbar />
+
+      <div class="space-y-6">
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+          <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+            Install GameSlot
+          </h1>
+          <p class="mt-2 text-sm text-blue-100/70">
+            Install GameSlot to your home screen so you get push notifications when a group session is confirmed.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+          <h2 class="mb-3 text-lg font-semibold">
+            {platform === "ios" && "Install on iPhone / iPad"}
+            {platform === "android" && "Install on Android"}
+            {platform === "desktop" && "Install on desktop"}
+          </h2>
+          {
+            platform === "ios" && (
+              <ol class="list-decimal space-y-2 pl-5 text-sm text-blue-100/80">
+                <li>Tap the Share button (square with an up arrow) in Safari's bottom toolbar.</li>
+                <li>
+                  Scroll down in the share sheet and tap <strong>"Add to Home Screen"</strong>.
+                </li>
+                <li>
+                  Confirm the name (GameSlot) and tap <strong>Add</strong> in the top-right.
+                </li>
+                <li>Open GameSlot from the new home-screen icon (this is required for iOS to allow notifications).</li>
+                <li>Come back to this page from inside the installed app and enable notifications below.</li>
+              </ol>
+            )
+          }
+          {
+            platform === "android" && (
+              <ol class="list-decimal space-y-2 pl-5 text-sm text-blue-100/80">
+                <li>
+                  Tap the three-dot menu (top-right in Chrome) and choose <strong>"Install app"</strong> or{" "}
+                  <strong>"Add to Home screen"</strong>.
+                </li>
+                <li>Confirm the install prompt. GameSlot's icon appears on your home screen.</li>
+                <li>Open GameSlot from the new home-screen icon.</li>
+                <li>Come back to this page from inside the installed app and enable notifications below.</li>
+              </ol>
+            )
+          }
+          {
+            platform === "desktop" && (
+              <ol class="list-decimal space-y-2 pl-5 text-sm text-blue-100/80">
+                <li>Look for the install button in Chrome's address bar (a small computer-with-arrow icon).</li>
+                <li>
+                  Click it and confirm <strong>Install</strong>.
+                </li>
+                <li>GameSlot opens in a dedicated window. Enable notifications below.</li>
+              </ol>
+            )
+          }
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
+          <h2 class="mb-3 text-lg font-semibold">Notifications</h2>
+          <NotificationControls client:load isSignedIn={user !== null} />
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

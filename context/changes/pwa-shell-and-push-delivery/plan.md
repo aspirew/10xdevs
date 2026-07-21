@@ -442,18 +442,18 @@ The `sw.js` file, once registered, is sticky — future SW updates must ship a n
 
 #### Automated
 
-- [x] 2.1 Migration file exists at `supabase/migrations/<timestamp>_push_subscriptions.sql`
-- [x] 2.2 `npx supabase db diff --linked` (or Studio `\d`) shows expected shape (cols + unique endpoint + FK + 2 RLS policies + index)
-- [x] 2.3 `npm run typecheck` passes
-- [x] 2.4 `npm run lint` passes
-- [x] 2.5 `npm run build` succeeds
-- [x] 2.6 `web-push@3.6.7` in `dependencies`, `@types/web-push` in `devDependencies`
+- [x] 2.1 Migration file exists at `supabase/migrations/<timestamp>_push_subscriptions.sql` — 78503f1
+- [x] 2.2 `npx supabase db diff --linked` (or Studio `\d`) shows expected shape (cols + unique endpoint + FK + 2 RLS policies + index) — 78503f1
+- [x] 2.3 `npm run typecheck` passes — 78503f1
+- [x] 2.4 `npm run lint` passes — 78503f1
+- [x] 2.5 `npm run build` succeeds — 78503f1
+- [x] 2.6 `web-push@3.6.7` in `dependencies`, `@types/web-push` in `devDependencies` — 78503f1
 
 #### Manual
 
-- [x] 2.7 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`
-- [x] 2.8 Studio `\d+ push_subscriptions` shows unique on `endpoint` + FK to `auth.users` ON DELETE CASCADE
-- [x] 2.9 Anon PostgREST select on `push_subscriptions` returns zero rows (RLS denies)
+- [x] 2.7 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl` — 78503f1
+- [x] 2.8 Studio `\d+ push_subscriptions` shows unique on `endpoint` + FK to `auth.users` ON DELETE CASCADE — 78503f1
+- [x] 2.9 Anon PostgREST select on `push_subscriptions` returns zero rows (RLS denies) — 78503f1
 - [ ] 2.10 `POST /api/push/subscribe` with a captured PushSubscription JSON returns `{ok:true}`; row visible in Studio
 - [ ] 2.11 Repeated subscribe call returns `{ok:true}`; no duplicate row (upsert on endpoint works)
 - [ ] 2.11a Anonymous continuity: subscribe curl with NO cookies but with an existing endpoint returns `{ok:true}` and updates keys without touching user_id; subscribe curl with NO cookies and a NEW endpoint returns 401 (reject anon inserts)
@@ -467,10 +467,10 @@ The `sw.js` file, once registered, is sticky — future SW updates must ship a n
 
 #### Automated
 
-- [ ] 3.1 `npm run typecheck` passes
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `npm run build` succeeds
-- [ ] 3.4 All five new files exist: `push-client.ts`, `install.astro`, `NotificationControls.tsx`, `InstallPushBanner.tsx`, `vapid-public-key.ts` + `sw.js` edits
+- [x] 3.1 `npm run typecheck` passes
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `npm run build` succeeds
+- [x] 3.4 All five new files exist: `push-client.ts`, `install.astro`, `NotificationControls.tsx`, `InstallPushBanner.tsx`, `vapid-public-key.ts` + `sw.js` edits
 
 #### Manual
 

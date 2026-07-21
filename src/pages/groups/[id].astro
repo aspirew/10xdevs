@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import GroupCalendar from "@/components/GroupCalendar";
+import { InstallPushBanner } from "@/components/InstallPushBanner";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getAvailabilityWindow, type AvailabilityWindow } from "@/lib/availability";
 import { addDays, formatDate } from "@/lib/calendar";
@@ -98,6 +99,8 @@ if (group && admin) {
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
       <Topbar />
+
+      <InstallPushBanner client:load />
 
       {
         !group && (
