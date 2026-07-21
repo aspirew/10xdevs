@@ -55,7 +55,7 @@ The app-layer auth pattern from lessons.md §2 applies to every new endpoint: ve
 
 ## Critical Implementation Details
 
-- **Dev-loop testing**. `astro dev` will not exercise the service worker reliably (Vite HMR conflicts with SW registration and Cache API). Plan every manual verification step in this document around `npx astro build && npx astro preview` locally OR pushing to a Vercel Preview. Do NOT try to iterate on SW code in `astro dev` — the debug loop is broken by default. Chrome DevTools → Application → Service Workers → Update on reload + Bypass for network + Unregister is the standard inner loop.
+- **Dev-loop testing**. `astro dev` will not exercise the service worker reliably (Vite HMR conflicts with SW registration and Cache API). **AND** `@astrojs/vercel` adapter refuses the `astro preview` command entirely — verified 2026-07-21 mid-Phase-1: `[preview] The @astrojs/vercel adapter does not support the preview command.` So the plan's original "local preview OR Vercel Preview" collapses to **Vercel Preview only** for every manual verification step in this document. Push each phase's changes to a preview branch (or the default preview URL if working on main) and verify there. Do NOT try to iterate on SW code in `astro dev` — the debug loop is broken by default. Chrome DevTools → Application → Service Workers → Update on reload + Bypass for network + Unregister is the standard inner loop against the preview URL.
 - **iOS standalone gate for subscribe**. `navigator.serviceWorker.ready.then(reg => reg.pushManager.subscribe(...))` will throw on iOS Safari when NOT launched from the home-screen icon, regardless of permission state. The `/install` page must check `window.matchMedia('(display-mode: standalone)').matches` and hide the "Enable notifications" button when false, showing the install instructions instead. Do NOT attempt to prompt for permission before this check — the user experience is silent failure.
 - **`pushsubscriptionchange` is load-bearing** (and cookie-less). The service worker MUST implement a `pushsubscriptionchange` handler that (a) re-subscribes via `pushManager.subscribe` with the same `applicationServerKey` and (b) POSTs the new subscription to `/api/push/subscribe`. Without this, iOS devices go silent within days/weeks and the failure is invisible to both user and dev. Critically: `pushsubscriptionchange` fires without any open tab, so the session cookie may be days-stale and Supabase won't refresh it inside a SW request. `/api/push/subscribe` therefore has an **anonymous continuity path** — if the posted `endpoint` matches an existing row, allow the UPDATE of encryption keys without a session (see Phase 2 Change #4 for the contract). Without this path, the whole `pushsubscriptionchange` handler is silently useless after the first cookie expiry. Include a comment in the SW pointing at MDN and this plan.
 - **410 Gone cleanup**. The `sendPushToUser` helper MUST treat `410 Gone` and `404 Not Found` responses from the push service as "subscription is dead" and DELETE the row from `push_subscriptions`. Otherwise dead endpoints accumulate and future S-03 sends waste time on them. Log the deletion so we can see churn.
@@ -130,8 +130,8 @@ No changes to `<body>`. No JSX/TSX conversion.
 
 #### Manual Verification:
 
-- Run `npx astro build && npx astro preview`; open `http://localhost:4321` in Chrome desktop — DevTools → Application → Manifest shows the manifest parsed with no errors; Service Workers panel shows `/sw.js` as activated
-- Chrome desktop: install button appears in the address bar; clicking it produces a standalone-window install
+- Push to Vercel Preview; open the preview URL in Chrome desktop — DevTools → Application → Manifest shows the manifest parsed with no errors; Service Workers panel shows `/sw.js` as activated (localhost preview is not viable — `@astrojs/vercel` adapter refuses `astro preview`)
+- Chrome desktop against Vercel Preview: install button appears in the address bar; clicking it produces a standalone-window install
 - Chrome Android on a real phone (or Vercel Preview deploy — mandatory for iOS testing): install-to-home-screen prompt fires; installed app launches standalone (no browser chrome)
 - iOS Safari on a real iPhone against a Vercel Preview deploy: Share → Add to Home Screen shows GameSlot icon (apple-touch-icon renders correctly, not a generic favicon); tapping the home-screen icon launches standalone
 - Chrome DevTools → Application → Service Workers → "Update on reload" checked + reload → SW updates without requiring tab close (proves `skipWaiting` + `clients.claim`)
@@ -262,7 +262,7 @@ Validation: `endpoint` non-empty string; `keys.p256dh` and `keys.auth` non-empty
 
 - Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`; Studio `\d+ push_subscriptions` shows unique index on `endpoint` + FK to `auth.users` with `ON DELETE CASCADE`
 - Anon PostgREST select on `push_subscriptions` returns zero rows (RLS denies unauthenticated)
-- With member cookies on Vercel Preview: use browser DevTools to grab a real `PushSubscription` (from Phase 3 — actually, easier: use `curl` with a captured subscription JSON dumped from an earlier iOS session). Confirm `POST /api/push/subscribe` returns `{ok: true}` and Studio shows the row
+- With member cookies on Vercel Preview: use browser DevTools to grab a real `PushSubscription` from a captured iOS/Chrome session (Phase 3 provides the flow that captures one), then `curl` the preview URL. Confirm `POST /api/push/subscribe` returns `{ok: true}` and Studio shows the row. (Localhost curl is not viable — Vercel adapter refuses `astro preview`; run every Phase 2 curl against the Vercel Preview URL instead.)
 - Repeat the same subscribe curl → still `{ok: true}`, no duplicate row (upsert on endpoint works)
 - `POST /api/push/test` returns `{sent: 1, failed: 0, deleted: 0}` and a real push notification lands on the device (with the tab CLOSED)
 - `POST /api/push/unsubscribe` with the same endpoint returns `{ok: true}`; Studio confirms the row is gone
@@ -377,7 +377,7 @@ No automated tests are added (no test runner in the repo; consistent with S-01, 
 
 ### Manual Testing Steps:
 
-1. **Local build verification.** `npx astro build && npx astro preview` — Chrome DevTools → Application panel confirms manifest parsed, SW registered, icons all resolve.
+1. **Vercel Preview build verification.** Push to Vercel Preview, open the preview URL in Chrome — DevTools → Application panel confirms manifest parsed, SW registered, icons all resolve. (`astro preview` isn't available under `@astrojs/vercel`; local build sanity is limited to `npm run build` completing successfully.)
 2. **Android install + push.** Real Android device on Vercel Preview: install prompt, launch standalone, enable notifications, receive test push with app backgrounded.
 3. **iOS install + push.** Real iPhone on Vercel Preview: Add to Home Screen from Safari, launch icon (must be standalone before enabling), receive test push with app killed.
 4. **Multi-device.** Same user on two devices → two subscription rows → test push lands on both.
@@ -423,16 +423,16 @@ The `sw.js` file, once registered, is sticky — future SW updates must ship a n
 
 #### Automated
 
-- [ ] 1.1 `npm run typecheck` passes
-- [ ] 1.2 `npm run lint` passes
-- [ ] 1.3 `npm run build` succeeds with no warnings about missing manifest/sw.js
-- [ ] 1.4 `public/manifest.webmanifest`, `public/sw.js`, `public/icons/icon-{192,512,maskable-512}.png` all exist
-- [ ] 1.5 No new runtime deps added to `package.json`
+- [x] 1.1 `npm run typecheck` passes
+- [x] 1.2 `npm run lint` passes
+- [x] 1.3 `npm run build` succeeds with no warnings about missing manifest/sw.js
+- [x] 1.4 `public/manifest.webmanifest`, `public/sw.js`, `public/icons/icon-{192,512,maskable-512}.png` all exist
+- [x] 1.5 No new runtime deps added to `package.json`
 
 #### Manual
 
-- [ ] 1.6 Local preview build: DevTools shows manifest parsed OK and `/sw.js` activated
-- [ ] 1.7 Chrome desktop install button appears and produces a standalone window
+- [ ] 1.6 Vercel Preview: DevTools shows manifest parsed OK and `/sw.js` activated (localhost preview unavailable — Vercel adapter refuses `astro preview`)
+- [ ] 1.7 Chrome desktop on Vercel Preview: install button appears and produces a standalone window
 - [ ] 1.8 Android Chrome on real phone (or Vercel Preview): install-to-home-screen prompt fires; app launches standalone
 - [ ] 1.9 iOS Safari on real iPhone (Vercel Preview): Add to Home Screen shows apple-touch-icon; installed app launches standalone
 - [ ] 1.10 SW `Update on reload` reloads without requiring tab close (proves skipWaiting + clients.claim)
