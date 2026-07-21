@@ -3,7 +3,7 @@ project: GameSlot
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-06-02
+updated: 2026-07-21
 prd_version: 1
 main_goal: market-feedback
 top_blocker: time
@@ -30,7 +30,7 @@ GameSlot is a single, shared, lightweight calendar for one friend group: members
 | F-01  | google-oauth-signin                    | (foundation) Sign in via Google OAuth                               | —             | FR-001, Access Control                | done     |
 | F-02  | pwa-shell-and-push-delivery            | (foundation) PWA installs; push delivered via web-push              | —             | NFR §PWA, FR-012 (delivery path)      | ready    |
 | S-01  | create-group-and-invite                | Create a friend group and bring members in via an invite link       | F-01          | FR-002, FR-003, FR-004, US-01         | done     |
-| S-02  | mark-availability-with-overlap         | Mark availability and see who else is free, with overlap surfaced   | S-01          | FR-005, FR-006, FR-007, FR-008, US-01 | proposed |
+| S-02  | mark-availability-with-overlap         | Mark availability and see who else is free, with overlap surfaced   | S-01          | FR-005, FR-006, FR-007, FR-008, US-01 | done     |
 | S-03  | confirm-session-with-push-notification | Confirm a session at an overlapping slot and notify the whole group | S-02, F-02    | FR-009, FR-010, FR-011, FR-012, US-01 | proposed |
 
 ## Streams
@@ -112,7 +112,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Post-confirm unmark semantics (PRD Open Q #2) — what happens if a member unmarks a slot at which a session has been confirmed? Owner: design/impl. Block: no (define behavior before FR-007 ships, but doesn't block planning).
   - "Meaningful threshold" for visual emphasis on overlap (PRD §Business Logic notes definition deferred to design). Owner: design. Block: no.
 - **Risk:** FR-008 is the load-bearing FR per PRD's own Socratic: "the only FR doing real domain work; if it's wrong the rest is dressing." Overlap query correctness and the calendar visual are the wedge surface — the place to invest deeply.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Confirm a session and notify the group
 
@@ -163,3 +163,4 @@ These are explicitly out of v1 scope. They will not sneak into any slice's scope
 
 - **F-01: (foundation) GameSlot users sign in via Google OAuth; `signInWithOAuth` is wired end-to-end across local dev, preview, and prod; the OAuth callback handler issues a Supabase session.** — Archived 2026-06-01 → `context/archive/2026-05-27-google-oauth-signin/`. Lesson: —.
 - **S-01: A signed-in user can create a friend group, generate a shareable invite link for that group, and a different signed-in user who opens that link joins the group.** — Archived 2026-06-02 → `context/archive/2026-06-01-create-group-and-invite/`. Lesson: surfaced "Verify PostgREST honors `auth.uid()` before relying on RLS as the auth gate on Supabase projects" → context/foundation/lessons.md.
+- **S-02: A group member can mark and unmark availability at day + start-hour granularity, and the calendar view shows per-slot availability counts with visual emphasis on slots above a meaningful threshold.** — Archived 2026-07-21 → `context/archive/2026-06-04-mark-availability-with-overlap/`. Lesson: —.
