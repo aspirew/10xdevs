@@ -31,6 +31,20 @@ export default defineConfig({
       }),
       SUPABASE_SERVICE_ROLE_KEY: envField.string({ context: "server", access: "secret", optional: true }),
       SUPABASE_SECRET_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+      // Web Push (F-02). Generate the keypair once via
+      // `npx web-push generate-vapid-keys --json` and store in .env locally + Vercel Env
+      // for Preview + Production. PUBLIC_VAPID_PUBLIC_KEY is the same string as
+      // VAPID_PUBLIC_KEY — duplicated because Astro exposes `context: "client"` vars via
+      // `import.meta.env.PUBLIC_*` and needs the schema declaration to permit that access.
+      // This is the first genuinely client-context env var in the repo; existing NEXT_PUBLIC_
+      // vars are declared server-only because they're never actually bundled to the browser.
+      // VAPID public keys ARE safe to embed in the client bundle by design (RFC 8292).
+      // All four kept `optional: true` so the app boots in dev without VAPID; push endpoints
+      // hard-fail at call time if the keys are missing, which is the correct signal.
+      VAPID_PUBLIC_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+      VAPID_PRIVATE_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+      VAPID_SUBJECT: envField.string({ context: "server", access: "secret", optional: true }),
+      PUBLIC_VAPID_PUBLIC_KEY: envField.string({ context: "client", access: "public", optional: true }),
     },
   },
 });

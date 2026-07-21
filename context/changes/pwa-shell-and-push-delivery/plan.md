@@ -423,37 +423,37 @@ The `sw.js` file, once registered, is sticky — future SW updates must ship a n
 
 #### Automated
 
-- [x] 1.1 `npm run typecheck` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` succeeds with no warnings about missing manifest/sw.js
-- [x] 1.4 `public/manifest.webmanifest`, `public/sw.js`, `public/icons/icon-{192,512,maskable-512}.png` all exist
-- [x] 1.5 No new runtime deps added to `package.json`
+- [x] 1.1 `npm run typecheck` passes — 19992fa
+- [x] 1.2 `npm run lint` passes — 19992fa
+- [x] 1.3 `npm run build` succeeds with no warnings about missing manifest/sw.js — 19992fa
+- [x] 1.4 `public/manifest.webmanifest`, `public/sw.js`, `public/icons/icon-{192,512,maskable-512}.png` all exist — 19992fa
+- [x] 1.5 No new runtime deps added to `package.json` — 19992fa
 
 #### Manual
 
-- [ ] 1.6 Vercel Preview: DevTools shows manifest parsed OK and `/sw.js` activated (localhost preview unavailable — Vercel adapter refuses `astro preview`)
-- [ ] 1.7 Chrome desktop on Vercel Preview: install button appears and produces a standalone window
-- [ ] 1.8 Android Chrome on real phone (or Vercel Preview): install-to-home-screen prompt fires; app launches standalone
-- [ ] 1.9 iOS Safari on real iPhone (Vercel Preview): Add to Home Screen shows apple-touch-icon; installed app launches standalone
-- [ ] 1.10 SW `Update on reload` reloads without requiring tab close (proves skipWaiting + clients.claim)
-- [ ] 1.11 Lighthouse PWA audit installability checks pass on the preview build
+- [x] 1.6 Vercel Preview: DevTools shows manifest parsed OK and `/sw.js` activated (localhost preview unavailable — Vercel adapter refuses `astro preview`) — 19992fa
+- [x] 1.7 Chrome desktop on Vercel Preview: install button appears and produces a standalone window — 19992fa
+- [x] 1.8 Android Chrome on real phone (or Vercel Preview): install-to-home-screen prompt fires; app launches standalone — 19992fa
+- [x] 1.9 iOS Safari on real iPhone (Vercel Preview): Add to Home Screen shows apple-touch-icon; installed app launches standalone — 19992fa
+- [x] 1.10 SW `Update on reload` reloads without requiring tab close (proves skipWaiting + clients.claim) — 19992fa
+- [x] 1.11 Lighthouse PWA audit installability checks pass on the preview build — 19992fa
 
 ### Phase 2: Subscription Persistence + Server-side Push
 
 #### Automated
 
-- [ ] 2.1 Migration file exists at `supabase/migrations/<timestamp>_push_subscriptions.sql`
-- [ ] 2.2 `npx supabase db diff --linked` (or Studio `\d`) shows expected shape (cols + unique endpoint + FK + 2 RLS policies + index)
-- [ ] 2.3 `npm run typecheck` passes
-- [ ] 2.4 `npm run lint` passes
-- [ ] 2.5 `npm run build` succeeds
-- [ ] 2.6 `web-push@3.6.7` in `dependencies`, `@types/web-push` in `devDependencies`
+- [x] 2.1 Migration file exists at `supabase/migrations/<timestamp>_push_subscriptions.sql`
+- [x] 2.2 `npx supabase db diff --linked` (or Studio `\d`) shows expected shape (cols + unique endpoint + FK + 2 RLS policies + index)
+- [x] 2.3 `npm run typecheck` passes
+- [x] 2.4 `npm run lint` passes
+- [x] 2.5 `npm run build` succeeds
+- [x] 2.6 `web-push@3.6.7` in `dependencies`, `@types/web-push` in `devDependencies`
 
 #### Manual
 
-- [ ] 2.7 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`
-- [ ] 2.8 Studio `\d+ push_subscriptions` shows unique on `endpoint` + FK to `auth.users` ON DELETE CASCADE
-- [ ] 2.9 Anon PostgREST select on `push_subscriptions` returns zero rows (RLS denies)
+- [x] 2.7 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`
+- [x] 2.8 Studio `\d+ push_subscriptions` shows unique on `endpoint` + FK to `auth.users` ON DELETE CASCADE
+- [x] 2.9 Anon PostgREST select on `push_subscriptions` returns zero rows (RLS denies)
 - [ ] 2.10 `POST /api/push/subscribe` with a captured PushSubscription JSON returns `{ok:true}`; row visible in Studio
 - [ ] 2.11 Repeated subscribe call returns `{ok:true}`; no duplicate row (upsert on endpoint works)
 - [ ] 2.11a Anonymous continuity: subscribe curl with NO cookies but with an existing endpoint returns `{ok:true}` and updates keys without touching user_id; subscribe curl with NO cookies and a NEW endpoint returns 401 (reject anon inserts)
