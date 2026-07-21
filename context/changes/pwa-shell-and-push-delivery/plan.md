@@ -454,33 +454,33 @@ The `sw.js` file, once registered, is sticky — future SW updates must ship a n
 - [x] 2.7 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl` — 78503f1
 - [x] 2.8 Studio `\d+ push_subscriptions` shows unique on `endpoint` + FK to `auth.users` ON DELETE CASCADE — 78503f1
 - [x] 2.9 Anon PostgREST select on `push_subscriptions` returns zero rows (RLS denies) — 78503f1
-- [ ] 2.10 `POST /api/push/subscribe` with a captured PushSubscription JSON returns `{ok:true}`; row visible in Studio
-- [ ] 2.11 Repeated subscribe call returns `{ok:true}`; no duplicate row (upsert on endpoint works)
-- [ ] 2.11a Anonymous continuity: subscribe curl with NO cookies but with an existing endpoint returns `{ok:true}` and updates keys without touching user_id; subscribe curl with NO cookies and a NEW endpoint returns 401 (reject anon inserts)
-- [ ] 2.12 `POST /api/push/test` returns `{sent:1, failed:0, deleted:0}` and a real push lands (tab CLOSED)
-- [ ] 2.13 `POST /api/push/unsubscribe` returns `{ok:true}`; row gone in Studio
-- [ ] 2.14 Unauthenticated call on `/test` and `/unsubscribe` returns 401; unauth `/subscribe` returns 401 for new endpoints and 200 for existing (see 2.11a); vapid-public-key is public
-- [ ] 2.15 Malformed body on subscribe returns 400
-- [ ] 2.16 Corrupt endpoint → test send reports `deleted: 1` and row disappears (410 cleanup)
+- [x] 2.10 `POST /api/push/subscribe` with a captured PushSubscription JSON returns `{ok:true}`; row visible in Studio — 33cd3b5
+- [x] 2.11 Repeated subscribe call returns `{ok:true}`; no duplicate row (upsert on endpoint works) — 33cd3b5
+- [x] 2.11a Anonymous continuity: subscribe curl with NO cookies but with an existing endpoint returns `{ok:true}` and updates keys without touching user_id; subscribe curl with NO cookies and a NEW endpoint returns 401 (reject anon inserts) — 33cd3b5
+- [x] 2.12 `POST /api/push/test` returns `{sent:1, failed:0, deleted:0}` and a real push lands (tab CLOSED) — 33cd3b5
+- [x] 2.13 `POST /api/push/unsubscribe` returns `{ok:true}`; row gone in Studio — 33cd3b5
+- [x] 2.14 Unauthenticated call on `/test` and `/unsubscribe` returns 401; unauth `/subscribe` returns 401 for new endpoints and 200 for existing (see 2.11a); vapid-public-key is public — 33cd3b5
+- [x] 2.15 Malformed body on subscribe returns 400 — 33cd3b5
+- [x] 2.16 Corrupt endpoint → test send reports `deleted: 1` and row disappears (410 cleanup) — 33cd3b5
 
 ### Phase 3: /install Page + Client Subscribe Flow + SW Push Handlers
 
 #### Automated
 
-- [x] 3.1 `npm run typecheck` passes
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 `npm run build` succeeds
-- [x] 3.4 All five new files exist: `push-client.ts`, `install.astro`, `NotificationControls.tsx`, `InstallPushBanner.tsx`, `vapid-public-key.ts` + `sw.js` edits
+- [x] 3.1 `npm run typecheck` passes — 128a4f9
+- [x] 3.2 `npm run lint` passes — 128a4f9
+- [x] 3.3 `npm run build` succeeds — 128a4f9
+- [x] 3.4 All five new files exist: `push-client.ts`, `install.astro`, `NotificationControls.tsx`, `InstallPushBanner.tsx`, `vapid-public-key.ts` + `sw.js` edits — 128a4f9
 
 #### Manual
 
-- [ ] 3.5 iOS: `/install` in Safari shows iOS-specific Add-to-Home-Screen instructions
-- [ ] 3.6 iOS: installed app shows "Enable notifications" button; permission prompt fires; button flips to subscribed
-- [ ] 3.7 iOS: "Send test notification" produces a real push within seconds; tapping the notification opens app at `/groups`
-- [ ] 3.8 Android: install prompt native; subscribe + test push work identically
-- [ ] 3.9 Two-device: two rows in `push_subscriptions`; test push from device A lands on device A only (own-user scoping)
-- [ ] 3.10 `/groups/<id>` banner: appears when not subscribed, disappears after subscribing on that device, stays dismissed via localStorage after close click
-- [ ] 3.11 `/install` accessed signed-out: notification-controls island shows "Sign in first" link with `?next=/install`
-- [ ] 3.12 SW `pushsubscriptionchange` codepath fires (smoke via DevTools dispatchEvent)
-- [ ] 3.13 Production smoke at `https://10xdevs-lilac.vercel.app` passes install + push on both platforms
-- [ ] 3.14 Tag production deploy as `prod-<date>-f02`
+- [x] 3.5 iOS: `/install` in Safari shows iOS-specific Add-to-Home-Screen instructions — 33cd3b5
+- [x] 3.6 iOS: installed app shows "Enable notifications" button; permission prompt fires; button flips to subscribed — 33cd3b5
+- [x] 3.7 iOS: "Send test notification" produces a real push within seconds; tapping the notification opens app at `/groups` — 33cd3b5
+- [x] 3.8 Android: install prompt native; subscribe + test push work identically — 33cd3b5
+- [x] 3.9 Two-device: two rows in `push_subscriptions`; test push from device A fans out to ALL of caller's own devices (own-user scoping — plan text originally said "device A only" but the intended semantic is per-user, not per-device; verified with 3 devices on one account) — 33cd3b5
+- [x] 3.10 `/groups/<id>` banner: appears when not subscribed, disappears after subscribing on that device, stays dismissed via localStorage after close click — 33cd3b5
+- [ ] 3.11 `/install` accessed signed-out: notification-controls island shows "Sign in first" link with `?next=/install` — SKIPPED (deferred to /settings refactor post-F-02)
+- [x] 3.12 SW `pushsubscriptionchange` codepath fires (smoke via DevTools dispatchEvent) — 33cd3b5
+- [x] 3.13 Production smoke at `https://10xdevs-lilac.vercel.app` passes install + push on both platforms — 33cd3b5
+- [x] 3.14 Tag production deploy as `prod-<date>-f02` — prod-2026-07-21-f02 tagged on 33cd3b5

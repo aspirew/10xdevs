@@ -1,7 +1,7 @@
 ---
 change_id: pwa-shell-and-push-delivery
 title: PWA shell and Web Push delivery foundation
-status: implementing
+status: implemented
 created: 2026-07-21
 updated: 2026-07-21
 archived_at: null
