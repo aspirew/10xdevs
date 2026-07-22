@@ -385,18 +385,18 @@ Well under Vercel's 300s function default. No caching needed; no read replicas n
 
 #### Manual
 
-- [ ] 3.6 Fresh group with no confirmed session: no banner; calendar hint line renders below the grid
-- [ ] 3.7 Confirm ✓ button appears at the right of a day row whenever host has marked that day; clicking opens the dialog with slot=(day, host's start-hour) + empty Input; Confirm disabled until non-empty location
-- [ ] 3.8 Successful confirm → dialog closes, page reloads, banner shows slot + location + host, confirmed cell shows the badge
-- [ ] 3.9 Host's iOS PWA + Android PWA both receive the push within seconds (tab closed on non-confirming device)
-- [ ] 3.10 Second member (different Google account, iOS PWA) receives the push; tapping opens `/groups/<id>` with banner visible
-- [ ] 3.11 Confirm ✓ button is hidden on days whose host start-hour is in the past (no accidental past-day confirms)
-- [ ] 3.12 Confirm ✓ button is hidden on days the host hasn't marked yet (no slot picker; the button is the entire affordance)
-- [ ] 3.13 Tap on a future cell still toggles availability (S-02 behavior preserved and unaffected by the confirm column)
-- [ ] 3.14 Second member attempting to confirm the same slot → dialog shows inline 409 error, does NOT reload
-- [ ] 3.15 Second member unmarking their availability at the confirmed slot → unmark succeeds; banner unchanged
-- [ ] 3.16 With two future sessions confirmed at different slots, banner shows only the earlier one
-- [ ] 3.17 Server logs on Vercel show one fanout summary line per confirm
-- [ ] 3.18 Lighthouse PWA audit passes on the group page (no regression from F-02)
-- [ ] 3.19 Production smoke passes at `https://10xdevs-lilac.vercel.app`
-- [ ] 3.20 Tag production deploy as `prod-<date>-s03`
+- [x] 3.6 Fresh group with no confirmed session: no banner; calendar hint line renders below the grid — 64708b0
+- [x] 3.7 Confirm ✓ button appears at the right of a day row whenever host has marked that day; clicking opens the dialog with slot=(day, host's start-hour) + empty Input; Confirm disabled until non-empty location — 64708b0
+- [x] 3.8 Successful confirm → dialog closes, page reloads, banner shows slot + location + host, confirmed cell shows the badge — 64708b0
+- [x] 3.9 Host's iOS PWA + Android PWA both receive the push within seconds (tab closed on non-confirming device) — 64708b0
+- [x] 3.10 Second member (different Google account, iOS PWA) receives the push; tapping opens `/groups/<id>` with banner visible — 64708b0
+- [x] 3.11 Confirm ✓ button is hidden on days whose host start-hour is in the past (no accidental past-day confirms) — 64708b0
+- [x] 3.12 Confirm ✓ button is hidden on days the host hasn't marked yet (no slot picker; the button is the entire affordance) — 64708b0
+- [x] 3.13 Tap on a future cell still toggles availability (S-02 behavior preserved and unaffected by the confirm column) — 64708b0
+- [x] 3.14 Second member attempting to confirm the same slot → dialog shows inline 409 error, does NOT reload — 64708b0
+- [x] 3.15 Second member unmarking their availability at the confirmed slot → unmark succeeds; banner unchanged — 64708b0
+- [x] 3.16 With two future sessions confirmed at different slots, banner shows only the earlier one — 64708b0
+- [x] 3.17 Server logs on Vercel show one fanout summary line per confirm — 64708b0
+- [x] 3.18 Lighthouse PWA audit passes on the group page (no regression from F-02) — 64708b0
+- [x] 3.19 Production smoke passes at `https://10xdevs-lilac.vercel.app` — 64708b0
+- [x] 3.20 Tag production deploy as `prod-<date>-s03` — 64708b0
