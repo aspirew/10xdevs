@@ -377,11 +377,11 @@ Well under Vercel's 300s function default. No caching needed; no read replicas n
 
 #### Automated
 
-- [x] 3.1 `npm run typecheck` passes
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 `npm run build` succeeds
-- [x] 3.4 Files exist: `src/components/ui/dialog.tsx`, `src/components/ConfirmSessionDialog.tsx`
-- [x] 3.5 `groups/[id].astro` imports `getNextUpcomingSession` and passes `confirmedSession` to `<GroupCalendar>`
+- [x] 3.1 `npm run typecheck` passes — 2ee29b5
+- [x] 3.2 `npm run lint` passes — 2ee29b5
+- [x] 3.3 `npm run build` succeeds — 2ee29b5
+- [x] 3.4 Files exist: `src/components/ui/dialog.tsx`, `src/components/ConfirmSessionDialog.tsx` — 2ee29b5
+- [x] 3.5 `groups/[id].astro` imports `getNextUpcomingSession` and passes `confirmedSession` to `<GroupCalendar>` — 2ee29b5
 
 #### Manual
 

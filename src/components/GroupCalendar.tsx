@@ -11,6 +11,11 @@ void React;
 interface ConfirmedSessionSlot {
   slot_date: string;
   slot_hour: number;
+  // True iff the current viewer is the host of this confirmed session. Gates the
+  // per-row ✓ confirm button: once a session exists, only its host may propose
+  // additional sessions (non-hosts hide the button entirely). Computed SSR-side
+  // in groups/[id].astro from nextSession.host_user_id vs Astro.locals.user.id.
+  iAmHost: boolean;
 }
 
 interface DialogSlot {
@@ -296,11 +301,16 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                     );
                   })}
                   {(() => {
-                    // Confirm-session button. Enabled only when the host has marked
-                    // this day AND that mark is not in the past. Confirms at the
-                    // host's own start-hour — an explicit affordance replaces the
-                    // long-press gesture that proved undiscoverable during smoke.
-                    const canConfirm = myStart !== undefined && !isPastSlot(day, myStart);
+                    // Confirm-session button. Shown only when:
+                    //   (a) the viewer has marked this day,
+                    //   (b) that mark is not in the past,
+                    //   (c) no session is confirmed yet OR the viewer IS the host of the
+                    //       already-confirmed session (non-hosts hide the button
+                    //       entirely once a session exists).
+                    const canConfirm =
+                      myStart !== undefined &&
+                      !isPastSlot(day, myStart) &&
+                      (confirmedSession == null || confirmedSession.iAmHost);
                     return (
                       <td className="px-1 py-0.5 text-center">
                         {canConfirm ? (

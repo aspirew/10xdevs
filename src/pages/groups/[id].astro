@@ -226,7 +226,13 @@ if (group && admin) {
                 initial={calendarInitial}
                 initialStart={startStr}
                 confirmedSession={
-                  nextSession ? { slot_date: nextSession.slot_date, slot_hour: nextSession.slot_hour } : null
+                  nextSession
+                    ? {
+                        slot_date: nextSession.slot_date,
+                        slot_hour: nextSession.slot_hour,
+                        iAmHost: nextSession.host_user_id === user.id,
+                      }
+                    : null
                 }
               />
             )}
