@@ -339,39 +339,39 @@ Well under Vercel's 300s function default. No caching needed; no read replicas n
 
 #### Automated
 
-- [x] 1.1 Migration file exists at `supabase/migrations/<timestamp>_sessions.sql`
-- [x] 1.2 `npm run typecheck` passes
-- [x] 1.3 `npm run lint` passes
-- [x] 1.4 `npm run build` succeeds
+- [x] 1.1 Migration file exists at `supabase/migrations/<timestamp>_sessions.sql` — dba3ac5
+- [x] 1.2 `npm run typecheck` passes — dba3ac5
+- [x] 1.3 `npm run lint` passes — dba3ac5
+- [x] 1.4 `npm run build` succeeds — dba3ac5
 
 #### Manual
 
-- [x] 1.5 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`
-- [x] 1.6 Studio `\d+ public.sessions` shows all columns, UNIQUE, composite FK to `group_members`, index, and RLS enabled
-- [x] 1.7 Studio anon smoke: `select * from public.sessions` as anon returns permission denied / zero rows
-- [x] 1.8 Studio postgres smoke: manually INSERT one row; second identical INSERT raises `23505`; rollback via `delete`
-- [x] 1.9 `git log -- supabase/migrations/` shows the new file as the audit trail
+- [x] 1.5 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl` — dba3ac5
+- [x] 1.6 Studio `\d+ public.sessions` shows all columns, UNIQUE, composite FK to `group_members`, index, and RLS enabled — dba3ac5
+- [x] 1.7 Studio anon smoke: `select * from public.sessions` as anon returns permission denied / zero rows — dba3ac5
+- [x] 1.8 Studio postgres smoke: manually INSERT one row; second identical INSERT raises `23505`; rollback via `delete` — dba3ac5
+- [x] 1.9 `git log -- supabase/migrations/` shows the new file as the audit trail — dba3ac5
 
 ### Phase 2: Endpoint + Fan-Out + Helper
 
 #### Automated
 
-- [ ] 2.1 `npm run typecheck` passes
-- [ ] 2.2 `npm run lint` passes
-- [ ] 2.3 `npm run build` succeeds
-- [ ] 2.4 Files exist: `src/lib/sessions.ts`, `src/pages/api/groups/[id]/sessions.ts`, `formatSlotLabel` exported from `src/lib/calendar.ts`
+- [x] 2.1 `npm run typecheck` passes
+- [x] 2.2 `npm run lint` passes
+- [x] 2.3 `npm run build` succeeds
+- [x] 2.4 Files exist: `src/lib/sessions.ts`, `src/pages/api/groups/[id]/sessions.ts`, `formatSlotLabel` exported from `src/lib/calendar.ts`
 
 #### Manual
 
-- [ ] 2.5 `curl -X POST` (signed-in cookies) with valid body returns `{ok:true, session:{...}}`; row visible in Studio
-- [ ] 2.6 Server logs show `session <id> → fanout: sent=<n> failed=<n> deleted=<n>` after the confirm
-- [ ] 2.7 Real push arrives on host's iOS + Android PWAs (tab closed) within seconds
-- [ ] 2.8 Second identical `curl` returns 409 `{error: "A session is already confirmed at this slot"}`
-- [ ] 2.9 `curl` with `slot_date` in the past → 400
-- [ ] 2.10 `curl` with empty `location` → 400
-- [ ] 2.11 `curl` with a slot no one has marked → 400 with "No members are available at this slot"
-- [ ] 2.12 Unauthenticated `curl` → 401; non-member → 403
-- [ ] 2.13 `getNextUpcomingSession(admin, groupId)` invoked from a scratch Astro page returns the confirmed row + host email; returns `null` when no future session exists
+- [x] 2.5 `curl -X POST` (signed-in cookies) with valid body returns `{ok:true, session:{...}}`; row visible in Studio
+- [x] 2.6 Server logs show `session <id> → fanout: sent=<n> failed=<n> deleted=<n>` after the confirm
+- [x] 2.7 Real push arrives on host's iOS + Android PWAs (tab closed) within seconds
+- [x] 2.8 Second identical `curl` returns 409 `{error: "A session is already confirmed at this slot"}`
+- [x] 2.9 `curl` with `slot_date` in the past → 400
+- [x] 2.10 `curl` with empty `location` → 400
+- [x] 2.11 `curl` with a slot no one has marked → 400 with "No members are available at this slot"
+- [x] 2.12 Unauthenticated `curl` → 401; non-member → 403
+- [x] 2.13 `getNextUpcomingSession(admin, groupId)` invoked from a scratch Astro page returns the confirmed row + host email; returns `null` when no future session exists
 
 ### Phase 3: UI — Banner, Confirm Dialog, Cell Badge
 

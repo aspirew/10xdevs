@@ -38,3 +38,15 @@ export function isPastSlot(slotDate: string, slotHour: number, now: Date = new D
 export function isIsoDate(s: unknown): s is string {
   return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
 }
+
+// Human-readable slot label, e.g. "Sat, Oct 3 · 7pm". Deterministic en-US locale
+// so server-side push bodies match what the client renders in the banner + dialog.
+// Uses native Date via parseDate; single-TZ-per-group means no offset math.
+export function formatSlotLabel(slotDate: string, slotHour: number): string {
+  const d = parseDate(slotDate);
+  const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+  const monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const hour12 =
+    slotHour === 0 ? "12am" : slotHour < 12 ? `${slotHour}am` : slotHour === 12 ? "12pm" : `${slotHour - 12}pm`;
+  return `${dayName}, ${monthDay} · ${hour12}`;
+}
