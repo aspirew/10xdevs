@@ -93,6 +93,11 @@ export const POST: APIRoute = async (context) => {
     }
     return json(500, { error: insertErr.message });
   }
+  // supabase-js narrows `inserted` to non-null after the error check, but the
+  // .single() contract permits data === null under some policy edge cases
+  // (INSERT allowed, returning SELECT blocked). Keep the runtime guard.
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (!inserted) return json(500, { error: "Insert returned no row" });
   const session: Session = inserted;
 
   // Fan-out is sequential to keep per-endpoint 410 cleanup ordered and avoid
@@ -117,6 +122,10 @@ export const POST: APIRoute = async (context) => {
       total.deleted += r.deleted;
     } catch (err) {
       console.warn("session", session.id, "→ fanout to", m.user_id, "threw:", (err as Error).message);
+      // +=1 is correct only because sendPushToUser can throw only BEFORE it
+      // iterates this user's push_subscriptions (VAPID misconfig / SELECT
+      // failure). If push.ts is ever refactored to throw mid-iteration,
+      // revisit this to look up the caller's subscription count instead.
       total.failed += 1;
     }
   }
