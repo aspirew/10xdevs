@@ -356,43 +356,43 @@ Well under Vercel's 300s function default. No caching needed; no read replicas n
 
 #### Automated
 
-- [x] 2.1 `npm run typecheck` passes
-- [x] 2.2 `npm run lint` passes
-- [x] 2.3 `npm run build` succeeds
-- [x] 2.4 Files exist: `src/lib/sessions.ts`, `src/pages/api/groups/[id]/sessions.ts`, `formatSlotLabel` exported from `src/lib/calendar.ts`
+- [x] 2.1 `npm run typecheck` passes — 3d79fd9
+- [x] 2.2 `npm run lint` passes — 3d79fd9
+- [x] 2.3 `npm run build` succeeds — 3d79fd9
+- [x] 2.4 Files exist: `src/lib/sessions.ts`, `src/pages/api/groups/[id]/sessions.ts`, `formatSlotLabel` exported from `src/lib/calendar.ts` — 3d79fd9
 
 #### Manual
 
-- [x] 2.5 `curl -X POST` (signed-in cookies) with valid body returns `{ok:true, session:{...}}`; row visible in Studio
-- [x] 2.6 Server logs show `session <id> → fanout: sent=<n> failed=<n> deleted=<n>` after the confirm
-- [x] 2.7 Real push arrives on host's iOS + Android PWAs (tab closed) within seconds
-- [x] 2.8 Second identical `curl` returns 409 `{error: "A session is already confirmed at this slot"}`
-- [x] 2.9 `curl` with `slot_date` in the past → 400
-- [x] 2.10 `curl` with empty `location` → 400
-- [x] 2.11 `curl` with a slot no one has marked → 400 with "No members are available at this slot"
-- [x] 2.12 Unauthenticated `curl` → 401; non-member → 403
-- [x] 2.13 `getNextUpcomingSession(admin, groupId)` invoked from a scratch Astro page returns the confirmed row + host email; returns `null` when no future session exists
+- [x] 2.5 `curl -X POST` (signed-in cookies) with valid body returns `{ok:true, session:{...}}`; row visible in Studio — 3d79fd9
+- [x] 2.6 Server logs show `session <id> → fanout: sent=<n> failed=<n> deleted=<n>` after the confirm — 3d79fd9
+- [x] 2.7 Real push arrives on host's iOS + Android PWAs (tab closed) within seconds — 3d79fd9
+- [x] 2.8 Second identical `curl` returns 409 `{error: "A session is already confirmed at this slot"}` — 3d79fd9
+- [x] 2.9 `curl` with `slot_date` in the past → 400 — 3d79fd9
+- [x] 2.10 `curl` with empty `location` → 400 — 3d79fd9
+- [x] 2.11 `curl` with a slot no one has marked → 400 with "No members are available at this slot" — 3d79fd9
+- [x] 2.12 Unauthenticated `curl` → 401; non-member → 403 — 3d79fd9
+- [x] 2.13 `getNextUpcomingSession(admin, groupId)` invoked from a scratch Astro page returns the confirmed row + host email; returns `null` when no future session exists — 3d79fd9
 
 ### Phase 3: UI — Banner, Confirm Dialog, Cell Badge
 
 #### Automated
 
-- [ ] 3.1 `npm run typecheck` passes
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `npm run build` succeeds
-- [ ] 3.4 Files exist: `src/components/ui/dialog.tsx`, `src/components/ConfirmSessionDialog.tsx`
-- [ ] 3.5 `groups/[id].astro` imports `getNextUpcomingSession` and passes `confirmedSession` to `<GroupCalendar>`
+- [x] 3.1 `npm run typecheck` passes
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `npm run build` succeeds
+- [x] 3.4 Files exist: `src/components/ui/dialog.tsx`, `src/components/ConfirmSessionDialog.tsx`
+- [x] 3.5 `groups/[id].astro` imports `getNextUpcomingSession` and passes `confirmedSession` to `<GroupCalendar>`
 
 #### Manual
 
 - [ ] 3.6 Fresh group with no confirmed session: no banner; calendar hint line renders below the grid
-- [ ] 3.7 Long-press on a future cell with ≥1 marker opens the dialog with slot summary + empty Input; Confirm disabled until non-empty location
+- [ ] 3.7 Confirm ✓ button appears at the right of a day row whenever host has marked that day; clicking opens the dialog with slot=(day, host's start-hour) + empty Input; Confirm disabled until non-empty location
 - [ ] 3.8 Successful confirm → dialog closes, page reloads, banner shows slot + location + host, confirmed cell shows the badge
 - [ ] 3.9 Host's iOS PWA + Android PWA both receive the push within seconds (tab closed on non-confirming device)
 - [ ] 3.10 Second member (different Google account, iOS PWA) receives the push; tapping opens `/groups/<id>` with banner visible
-- [ ] 3.11 Long-press on a past cell → dialog does NOT open
-- [ ] 3.12 Long-press on a future cell with 0 markers → dialog does NOT open
-- [ ] 3.13 Short tap on a future cell still toggles availability (S-02 behavior preserved)
+- [ ] 3.11 Confirm ✓ button is hidden on days whose host start-hour is in the past (no accidental past-day confirms)
+- [ ] 3.12 Confirm ✓ button is hidden on days the host hasn't marked yet (no slot picker; the button is the entire affordance)
+- [ ] 3.13 Tap on a future cell still toggles availability (S-02 behavior preserved and unaffected by the confirm column)
 - [ ] 3.14 Second member attempting to confirm the same slot → dialog shows inline 409 error, does NOT reload
 - [ ] 3.15 Second member unmarking their availability at the confirmed slot → unmark succeeds; banner unchanged
 - [ ] 3.16 With two future sessions confirmed at different slots, banner shows only the earlier one

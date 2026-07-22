@@ -5,7 +5,8 @@ import GroupCalendar from "@/components/GroupCalendar";
 import { InstallPushBanner } from "@/components/InstallPushBanner";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getAvailabilityWindow, type AvailabilityWindow } from "@/lib/availability";
-import { addDays, formatDate } from "@/lib/calendar";
+import { getNextUpcomingSession, type SessionWithHost } from "@/lib/sessions";
+import { addDays, formatDate, formatSlotLabel } from "@/lib/calendar";
 
 const user = Astro.locals.user;
 if (!user) {
@@ -91,6 +92,18 @@ if (group && admin) {
   } catch {
     // Non-fatal: render the page without the calendar island if the read fails.
     // (Calendar simply won't render; user sees Members + Invite as before.)
+  }
+}
+
+// S-03: next-upcoming-session banner. Reads the earliest confirmed session at
+// slot_date >= today; if none, `nextSession` stays null and the banner is skipped.
+// Non-fatal like the calendar read.
+let nextSession: SessionWithHost | null = null;
+if (group && admin) {
+  try {
+    nextSession = await getNextUpcomingSession(admin, group.id);
+  } catch {
+    // Non-fatal: no banner if the read fails; the rest of the page renders.
   }
 }
 ---
@@ -194,8 +207,28 @@ if (group && admin) {
               )}
             </div>
 
+            {nextSession && (
+              <div class="rounded-2xl border border-purple-400/30 bg-purple-500/15 p-6 text-white backdrop-blur-xl">
+                <h2 class="mb-1 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-lg font-semibold text-transparent">
+                  Next session
+                </h2>
+                <p class="text-base text-white">
+                  {formatSlotLabel(nextSession.slot_date, nextSession.slot_hour)} · {nextSession.location}
+                </p>
+                <p class="mt-1 text-xs text-blue-100/70">Hosted by {nextSession.host_email ?? "a member"}</p>
+              </div>
+            )}
+
             {calendarInitial && (
-              <GroupCalendar client:load groupId={group.id} initial={calendarInitial} initialStart={startStr} />
+              <GroupCalendar
+                client:load
+                groupId={group.id}
+                initial={calendarInitial}
+                initialStart={startStr}
+                confirmedSession={
+                  nextSession ? { slot_date: nextSession.slot_date, slot_hour: nextSession.slot_hour } : null
+                }
+              />
             )}
 
             <p class="text-center text-sm text-blue-100/60">

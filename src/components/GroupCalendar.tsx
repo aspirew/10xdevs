@@ -1,16 +1,30 @@
 import React, { useState } from "react";
 import type { AvailabilityWindow, MemberMark } from "@/lib/availability";
 import { addDays, formatDate, parseDate, isPastSlot } from "@/lib/calendar";
+import { ConfirmSessionDialog } from "@/components/ConfirmSessionDialog";
 
 // React is imported to mirror SignInForm.tsx — under `jsx: "react-jsx"` + Astro 6 + Vite,
 // omitting it can cause `jsxDEV is not a function` during dev hydration when the JSX
 // dev-runtime resolution loses its grip after a build→dev switch.
 void React;
 
+interface ConfirmedSessionSlot {
+  slot_date: string;
+  slot_hour: number;
+}
+
+interface DialogSlot {
+  slot_date: string;
+  slot_hour: number;
+  countAtSlot: number;
+  groupSize: number;
+}
+
 interface Props {
   groupId: string;
   initial: AvailabilityWindow;
   initialStart: string;
+  confirmedSession?: ConfirmedSessionSlot | null;
 }
 
 // Fixed 4-week window length. Nav by ±7 days; "Today" resets to today.
@@ -26,11 +40,12 @@ const VISIBLE_HOUR_END = 24;
 // surfaces "from what hour onward does most of the group overlap?" — overlap count at
 // (date, hour) = members whose start_hour <= hour on that date.
 
-export default function GroupCalendar({ groupId, initial, initialStart }: Props) {
+export default function GroupCalendar({ groupId, initial, initialStart, confirmedSession }: Props) {
   const [start, setStart] = useState(initialStart);
   const [data, setData] = useState<AvailabilityWindow>(initial);
   const [loading, setLoading] = useState(false);
   const [failedDates, setFailedDates] = useState<Set<string>>(new Set());
+  const [dialogSlot, setDialogSlot] = useState<DialogSlot | null>(null);
 
   const startDate = parseDate(start);
   const endStr = formatDate(addDays(startDate, WINDOW_DAYS - 1));
@@ -176,7 +191,7 @@ export default function GroupCalendar({ groupId, initial, initialStart }: Props)
       <p className="mb-3 text-xs text-blue-100/60">
         {start} → {endStr} · {data.groupSize} {data.groupSize === 1 ? "member" : "members"} · highlight at ≥{" "}
         {data.threshold}/{data.groupSize} available · tap an hour to mark when you&apos;re free from then on; tap again
-        to clear that day
+        to clear that day · tap the ✓ at the right of a day to confirm a session at your marked hour
       </p>
       <div className="overflow-x-auto">
         <table className="text-xs">
@@ -188,6 +203,7 @@ export default function GroupCalendar({ groupId, initial, initialStart }: Props)
                   {h}
                 </th>
               ))}
+              <th className="px-1 py-0.5 text-center font-normal text-blue-100/60">✓</th>
             </tr>
           </thead>
           <tbody>
@@ -214,6 +230,7 @@ export default function GroupCalendar({ groupId, initial, initialStart }: Props)
                     const isHot = count > 0 && count >= data.threshold;
                     const isMyStart = myStart === h;
                     const iAmAvailable = myStart !== undefined && myStart <= h;
+                    const isConfirmed = confirmedSession?.slot_date === day && confirmedSession.slot_hour === h;
                     // Color channels are separated so the eye can read them independently:
                     //   blue   = YOU (your start + your range from start to end-of-day)
                     //   purple = GROUP overlap met (FR-008 wedge signal)
@@ -256,13 +273,59 @@ export default function GroupCalendar({ groupId, initial, initialStart }: Props)
                         key={key}
                         onClick={past ? undefined : () => void toggle(day, h)}
                         className={cellClass}
-                        aria-label={label}
+                        aria-label={isConfirmed ? `${label} · session confirmed` : label}
                         title={label}
                       >
-                        {count > 0 ? `${count}/${data.groupSize}` : ""}
+                        {isConfirmed ? (
+                          <span className="flex flex-col items-center leading-none">
+                            <span aria-hidden="true" className="text-yellow-300">
+                              ★
+                            </span>
+                            {count > 0 && (
+                              <span className="text-[10px] text-blue-100/70">
+                                {count}/{data.groupSize}
+                              </span>
+                            )}
+                          </span>
+                        ) : count > 0 ? (
+                          `${count}/${data.groupSize}`
+                        ) : (
+                          ""
+                        )}
                       </td>
                     );
                   })}
+                  {(() => {
+                    // Confirm-session button. Enabled only when the host has marked
+                    // this day AND that mark is not in the past. Confirms at the
+                    // host's own start-hour — an explicit affordance replaces the
+                    // long-press gesture that proved undiscoverable during smoke.
+                    const canConfirm = myStart !== undefined && !isPastSlot(day, myStart);
+                    return (
+                      <td className="px-1 py-0.5 text-center">
+                        {canConfirm ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDialogSlot({
+                                slot_date: day,
+                                slot_hour: myStart,
+                                countAtSlot: countAt(day, myStart),
+                                groupSize: data.groupSize,
+                              });
+                            }}
+                            aria-label={`Confirm session on ${day} at ${myStart}:00`}
+                            title={`Confirm session at ${myStart}:00`}
+                            className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/20 bg-white/10 text-xs text-white transition-colors hover:border-purple-300 hover:bg-purple-500/30 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                          >
+                            ✓
+                          </button>
+                        ) : (
+                          <span className="inline-block h-6 w-6" aria-hidden="true" />
+                        )}
+                      </td>
+                    );
+                  })()}
                 </tr>
               );
             })}
@@ -270,6 +333,17 @@ export default function GroupCalendar({ groupId, initial, initialStart }: Props)
         </table>
       </div>
       {loading && <p className="mt-2 text-center text-xs text-blue-100/40">Loading…</p>}
+      <ConfirmSessionDialog
+        key={dialogSlot ? `${dialogSlot.slot_date}|${dialogSlot.slot_hour}` : "closed"}
+        groupId={groupId}
+        slot={dialogSlot}
+        onCancel={() => {
+          setDialogSlot(null);
+        }}
+        onConfirmed={() => {
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }
