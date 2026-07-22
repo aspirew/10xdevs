@@ -55,6 +55,11 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
   const startDate = parseDate(start);
   const endStr = formatDate(addDays(startDate, WINDOW_DAYS - 1));
 
+  // Whole confirm column disappears for non-hosts once a session exists. Before
+  // any session is confirmed anyone can propose one (they'd become the host);
+  // once someone has, only that host retains the affordance.
+  const showConfirmColumn = confirmedSession == null || confirmedSession.iAmHost;
+
   // Derived lookups. The wire shape gives "mine" vs "others" already split — no
   // user_ids on the client. We just need fast date-keyed lookups for render.
   const myStartByDate = new Map<string, number>(data.myMarks.map((m) => [m.slot_date, m.slot_hour]));
@@ -196,7 +201,8 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
       <p className="mb-3 text-xs text-blue-100/60">
         {start} → {endStr} · {data.groupSize} {data.groupSize === 1 ? "member" : "members"} · highlight at ≥{" "}
         {data.threshold}/{data.groupSize} available · tap an hour to mark when you&apos;re free from then on; tap again
-        to clear that day · tap the ✓ at the right of a day to confirm a session at your marked hour
+        to clear that day
+        {showConfirmColumn && " · tap the ✓ at the right of a day to confirm a session at your marked hour"}
       </p>
       <div className="overflow-x-auto">
         <table className="text-xs">
@@ -208,7 +214,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                   {h}
                 </th>
               ))}
-              <th className="px-1 py-0.5 text-center font-normal text-blue-100/60">✓</th>
+              {showConfirmColumn && <th className="px-1 py-0.5 text-center font-normal text-blue-100/60">✓</th>}
             </tr>
           </thead>
           <tbody>
@@ -300,42 +306,30 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                       </td>
                     );
                   })}
-                  {(() => {
-                    // Confirm-session button. Shown only when:
-                    //   (a) the viewer has marked this day,
-                    //   (b) that mark is not in the past,
-                    //   (c) no session is confirmed yet OR the viewer IS the host of the
-                    //       already-confirmed session (non-hosts hide the button
-                    //       entirely once a session exists).
-                    const canConfirm =
-                      myStart !== undefined &&
-                      !isPastSlot(day, myStart) &&
-                      (confirmedSession == null || confirmedSession.iAmHost);
-                    return (
-                      <td className="px-1 py-0.5 text-center">
-                        {canConfirm ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setDialogSlot({
-                                slot_date: day,
-                                slot_hour: myStart,
-                                countAtSlot: countAt(day, myStart),
-                                groupSize: data.groupSize,
-                              });
-                            }}
-                            aria-label={`Confirm session on ${day} at ${myStart}:00`}
-                            title={`Confirm session at ${myStart}:00`}
-                            className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/20 bg-white/10 text-xs text-white transition-colors hover:border-purple-300 hover:bg-purple-500/30 focus:ring-2 focus:ring-purple-400 focus:outline-none"
-                          >
-                            ✓
-                          </button>
-                        ) : (
-                          <span className="inline-block h-6 w-6" aria-hidden="true" />
-                        )}
-                      </td>
-                    );
-                  })()}
+                  {showConfirmColumn && (
+                    <td className="px-1 py-0.5 text-center">
+                      {myStart !== undefined && !isPastSlot(day, myStart) ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDialogSlot({
+                              slot_date: day,
+                              slot_hour: myStart,
+                              countAtSlot: countAt(day, myStart),
+                              groupSize: data.groupSize,
+                            });
+                          }}
+                          aria-label={`Confirm session on ${day} at ${myStart}:00`}
+                          title={`Confirm session at ${myStart}:00`}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/20 bg-white/10 text-xs text-white transition-colors hover:border-purple-300 hover:bg-purple-500/30 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                        >
+                          ✓
+                        </button>
+                      ) : (
+                        <span className="inline-block h-6 w-6" aria-hidden="true" />
+                      )}
+                    </td>
+                  )}
                 </tr>
               );
             })}
