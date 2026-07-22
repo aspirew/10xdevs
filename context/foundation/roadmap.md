@@ -31,7 +31,7 @@ GameSlot is a single, shared, lightweight calendar for one friend group: members
 | F-02  | pwa-shell-and-push-delivery            | (foundation) PWA installs; push delivered via web-push              | —             | NFR §PWA, FR-012 (delivery path)      | done     |
 | S-01  | create-group-and-invite                | Create a friend group and bring members in via an invite link       | F-01          | FR-002, FR-003, FR-004, US-01         | done     |
 | S-02  | mark-availability-with-overlap         | Mark availability and see who else is free, with overlap surfaced   | S-01          | FR-005, FR-006, FR-007, FR-008, US-01 | done     |
-| S-03  | confirm-session-with-push-notification | Confirm a session at an overlapping slot and notify the whole group | S-02, F-02    | FR-009, FR-010, FR-011, FR-012, US-01 | proposed |
+| S-03  | confirm-session-with-push-notification | Confirm a session at an overlapping slot and notify the whole group | S-02, F-02    | FR-009, FR-010, FR-011, FR-012, US-01 | done     |
 
 ## Streams
 
@@ -126,7 +126,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Push delivery fallback (PRD Open Q #3) — what if a user denied push permission or push fails? Owner: user. Block: no for v1 (acceptable to ship without fallback; first group's host can manually confirm receipt during validation).
   - Concurrency on simultaneous confirms (PRD FR-009 Socratic noted as acceptable risk at friend-group scale). Owner: implementation. Block: no.
 - **Risk:** This is the **north star** — the validation milestone. Closes US-01 end-to-end. If push delivery degrades on iOS Safari, the feedback signal from the first real group degrades with it; instrumenting delivery (per-subscription success/failure log) is the cheapest hedge.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -165,3 +165,4 @@ These are explicitly out of v1 scope. They will not sneak into any slice's scope
 - **S-01: A signed-in user can create a friend group, generate a shareable invite link for that group, and a different signed-in user who opens that link joins the group.** — Archived 2026-06-02 → `context/archive/2026-06-01-create-group-and-invite/`. Lesson: surfaced "Verify PostgREST honors `auth.uid()` before relying on RLS as the auth gate on Supabase projects" → context/foundation/lessons.md.
 - **S-02: A group member can mark and unmark availability at day + start-hour granularity, and the calendar view shows per-slot availability counts with visual emphasis on slots above a meaningful threshold.** — Archived 2026-07-21 → `context/archive/2026-06-04-mark-availability-with-overlap/`. Lesson: —.
 - **F-02: (foundation) GameSlot is installable to a phone's home screen on Android and iOS (web app manifest + registered service worker); VAPID keys are generated and stored; the server can dispatch a Web Push message that the service worker receives and displays.** — Archived 2026-07-22 → `context/archive/2026-07-21-pwa-shell-and-push-delivery/`. Lesson: —.
+- **S-03: A group member picks an availability slot from the shared calendar, sets a free-text meeting location, and confirms the session (becoming its host); every group member receives a push notification with day, time, and location.** — Archived 2026-07-22 → `context/archive/2026-07-22-confirm-session-with-push-notification/`. Lesson: —.

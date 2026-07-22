@@ -1,10 +1,10 @@
 ---
 change_id: confirm-session-with-push-notification
 title: Confirm session with push notification
-status: impl_reviewed
+status: archived
 created: 2026-07-22
 updated: 2026-07-22
-archived_at: null
+archived_at: 2026-07-22T21:23:37Z
 ---
 
 ## Notes
