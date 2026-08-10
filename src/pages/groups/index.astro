@@ -58,12 +58,14 @@ if (!admin) {
       <Topbar />
 
       <div class="mb-6 flex items-center justify-between">
-        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+        <h1
+          class="bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-3xl font-bold text-transparent"
+        >
           Your groups
         </h1>
         <a
           href="/groups/new"
-          class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+          class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-emerald-950 transition-colors hover:bg-amber-400"
         >
           New group
         </a>
@@ -98,9 +100,9 @@ if (!admin) {
 
       {
         groups.length === 0 && !listError && (
-          <div class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-white backdrop-blur-xl">
-            <p class="text-blue-100/80">You're not in any groups yet.</p>
-            <p class="mt-2 text-sm text-blue-100/50">Create one and invite friends.</p>
+          <div class="rounded-2xl border border-amber-100/10 bg-amber-100/5 p-8 text-center text-amber-50 backdrop-blur-xl">
+            <p class="text-amber-100/80">You're not in any groups yet.</p>
+            <p class="mt-2 text-sm text-amber-100/50">Create one and invite friends.</p>
           </div>
         )
       }
@@ -112,10 +114,10 @@ if (!admin) {
               <li>
                 <a
                   href={`/groups/${g.id}`}
-                  class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 text-white backdrop-blur-xl transition-colors hover:bg-white/10"
+                  class="flex items-center justify-between rounded-2xl border border-amber-100/10 bg-amber-100/5 p-4 text-amber-50 backdrop-blur-xl transition-colors hover:bg-amber-100/10"
                 >
                   <span class="font-semibold">{g.name}</span>
-                  <span class="text-sm text-blue-100/60">
+                  <span class="text-sm text-amber-100/60">
                     {g.group_members.length} {g.group_members.length === 1 ? "member" : "members"}
                   </span>
                 </a>

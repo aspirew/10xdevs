@@ -168,7 +168,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white backdrop-blur-xl">
+    <div className="rounded-2xl border border-amber-100/10 bg-amber-100/5 p-6 text-amber-50 backdrop-blur-xl">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Availability</h2>
         <div className="flex gap-1">
@@ -176,7 +176,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
             type="button"
             onClick={() => void navTo(formatDate(addDays(parseDate(start), -7)))}
             disabled={loading}
-            className="rounded-md border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+            className="rounded-md border border-amber-100/20 bg-amber-100/10 px-3 py-1 text-xs font-medium text-amber-50 transition-colors hover:bg-amber-100/20 disabled:opacity-50"
           >
             ← Prev
           </button>
@@ -184,7 +184,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
             type="button"
             onClick={() => void navTo(formatDate(new Date()))}
             disabled={loading}
-            className="rounded-md border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+            className="rounded-md border border-amber-100/20 bg-amber-100/10 px-3 py-1 text-xs font-medium text-amber-50 transition-colors hover:bg-amber-100/20 disabled:opacity-50"
           >
             Today
           </button>
@@ -192,13 +192,13 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
             type="button"
             onClick={() => void navTo(formatDate(addDays(parseDate(start), 7)))}
             disabled={loading}
-            className="rounded-md border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+            className="rounded-md border border-amber-100/20 bg-amber-100/10 px-3 py-1 text-xs font-medium text-amber-50 transition-colors hover:bg-amber-100/20 disabled:opacity-50"
           >
             Next →
           </button>
         </div>
       </div>
-      <p className="mb-3 text-xs text-blue-100/60">
+      <p className="mb-3 text-xs text-amber-100/60">
         {start} → {endStr} · {data.groupSize} {data.groupSize === 1 ? "member" : "members"} · highlight at ≥{" "}
         {data.threshold}/{data.groupSize} available · tap an hour to mark when you&apos;re free from then on; tap again
         to clear that day
@@ -208,13 +208,13 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
         <table className="text-xs">
           <thead>
             <tr>
-              <th className="sticky left-0 bg-white/5 px-1 py-0.5"></th>
+              <th className="sticky left-0 bg-amber-100/5 px-1 py-0.5"></th>
               {hours.map((h) => (
-                <th key={h} className="px-1 py-0.5 text-center font-normal text-blue-100/60">
+                <th key={h} className="px-1 py-0.5 text-center font-normal text-amber-100/60">
                   {h}
                 </th>
               ))}
-              {showConfirmColumn && <th className="px-1 py-0.5 text-center font-normal text-blue-100/60">✓</th>}
+              {showConfirmColumn && <th className="px-1 py-0.5 text-center font-normal text-amber-100/60">✓</th>}
             </tr>
           </thead>
           <tbody>
@@ -231,7 +231,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
               const dayFailed = failedDates.has(day);
               return (
                 <tr key={day}>
-                  <th className="sticky left-0 z-10 bg-white/5 px-2 py-0.5 text-right font-normal whitespace-nowrap text-blue-100/70">
+                  <th className="sticky left-0 z-10 bg-amber-100/5 px-2 py-0.5 text-right font-normal whitespace-nowrap text-amber-100/70">
                     {dayLabel}
                   </th>
                   {hours.map((h) => {
@@ -243,28 +243,28 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                     const iAmAvailable = myStart !== undefined && myStart <= h;
                     const isConfirmed = confirmedSession?.slot_date === day && confirmedSession.slot_hour === h;
                     // Color channels are separated so the eye can read them independently:
-                    //   blue   = YOU (your start + your range from start to end-of-day)
-                    //   purple = GROUP overlap met (FR-008 wedge signal)
+                    //   amber   = YOU (your start + your range from start to end-of-day)
+                    //   emerald = GROUP overlap met (FR-008 wedge signal)
                     // Priority is exclusive (no background-class clashes): isMyStart wins
                     // over isHot wins over iAmAvailable wins over plain count.
                     let bgClass = "";
                     let ringClass = "";
                     let weightClass = "";
                     if (isMyStart) {
-                      bgClass = "bg-blue-500/40";
-                      ringClass = "ring-2 ring-blue-300 ring-inset";
+                      bgClass = "bg-amber-300/45";
+                      ringClass = "ring-2 ring-amber-200 ring-inset";
                       weightClass = "font-bold";
                     } else if (isHot) {
-                      bgClass = "bg-purple-600/30";
-                      ringClass = "ring-1 ring-purple-400 ring-inset";
+                      bgClass = "bg-emerald-500/35";
+                      ringClass = "ring-1 ring-emerald-300 ring-inset";
                     } else if (iAmAvailable) {
-                      bgClass = "bg-blue-500/10";
+                      bgClass = "bg-amber-300/15";
                     } else if (count > 0) {
-                      bgClass = "bg-white/5";
+                      bgClass = "bg-amber-50/8";
                     }
                     const cellClass = [
-                      "h-9 w-11 border border-white/5 text-center select-none text-blue-100/80",
-                      past ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-white/10",
+                      "h-9 w-11 border border-amber-100/8 text-center select-none text-amber-50/80",
+                      past ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-amber-100/10",
                       bgClass,
                       ringClass,
                       weightClass,
@@ -289,11 +289,11 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                       >
                         {isConfirmed ? (
                           <span className="flex flex-col items-center leading-none">
-                            <span aria-hidden="true" className="text-yellow-300">
+                            <span aria-hidden="true" className="text-amber-100">
                               ★
                             </span>
                             {count > 0 && (
-                              <span className="text-[10px] text-blue-100/70">
+                              <span className="text-[10px] text-amber-100/70">
                                 {count}/{data.groupSize}
                               </span>
                             )}
@@ -321,7 +321,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                           }}
                           aria-label={`Confirm session on ${day} at ${myStart}:00`}
                           title={`Confirm session at ${myStart}:00`}
-                          className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/20 bg-white/10 text-xs text-white transition-colors hover:border-purple-300 hover:bg-purple-500/30 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-amber-100/20 bg-amber-100/10 text-xs text-amber-50 transition-colors hover:border-emerald-300 hover:bg-emerald-500/30 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                         >
                           ✓
                         </button>
@@ -336,7 +336,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
           </tbody>
         </table>
       </div>
-      {loading && <p className="mt-2 text-center text-xs text-blue-100/40">Loading…</p>}
+      {loading && <p className="mt-2 text-center text-xs text-amber-100/40">Loading…</p>}
       <ConfirmSessionDialog
         key={dialogSlot ? `${dialogSlot.slot_date}|${dialogSlot.slot_hour}` : "closed"}
         groupId={groupId}

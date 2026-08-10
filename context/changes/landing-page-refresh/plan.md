@@ -373,41 +373,41 @@ Nothing to migrate — no data model, no persistence, no environment change. `gi
 
 #### Manual
 
-- [ ] 1.5 `npm run dev` starts cleanly; `/` renders with a deep-forest gradient background (no purple)
-- [ ] 1.6 All four pages using the old `bg-cosmic` (`/`, `/install`, and any others) now render with the new tavern background
-- [ ] 1.7 On a mobile device or DevTools mobile emulator, the browser chrome / OS status bar takes on the new `#12291d` colour rather than purple
-- [ ] 1.8 The install prompt (on desktop Chrome or Android) shows the new background and theme colour rather than the old white/purple
+- [x] 1.5 `npm run dev` starts cleanly; `/` renders with a deep-forest gradient background (no purple) — bf88099
+- [x] 1.6 All four pages using the old `bg-cosmic` (`/`, `/install`, and any others) now render with the new tavern background — bf88099
+- [x] 1.7 On a mobile device or DevTools mobile emulator, the browser chrome / OS status bar takes on the new `#12291d` colour rather than purple — bf88099
+- [x] 1.8 The install prompt (on desktop Chrome or Android) shows the new background and theme colour rather than the old white/purple — bf88099
 
 ### Phase 2: Landing page rewrite
 
 #### Automated
 
-- [x] 2.1 Type-checking passes: `npm run typecheck`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 No `bg-cosmic`, `from-blue-200`, `via-purple-200`, `to-pink-200`, `bg-purple-600`, `bg-purple-500`, `bg-blue-500`, `bg-indigo-400`, `text-purple-300`, or `text-blue-100` utilities remain in `src/components/Welcome.astro`
-- [x] 2.4 Hero renders the string "GameSlot" (one word); "Game Slot" returns zero hits
-- [x] 2.5 No stock Astro-starter phrases remain in `src/components/Welcome.astro`
+- [x] 2.1 Type-checking passes: `npm run typecheck` — 2ca7db7
+- [x] 2.2 Linting passes: `npm run lint` — 2ca7db7
+- [x] 2.3 No `bg-cosmic`, `from-blue-200`, `via-purple-200`, `to-pink-200`, `bg-purple-600`, `bg-purple-500`, `bg-blue-500`, `bg-indigo-400`, `text-purple-300`, or `text-blue-100` utilities remain in `src/components/Welcome.astro` — 2ca7db7
+- [x] 2.4 Hero renders the string "GameSlot" (one word); "Game Slot" returns zero hits — 2ca7db7
+- [x] 2.5 No stock Astro-starter phrases remain in `src/components/Welcome.astro` — 2ca7db7
 
 #### Manual
 
-- [ ] 2.6 `/` renders "GameSlot" centered as the hero; description reads as the two-sentence product tagline; CTAs still route to `/auth/signin` and `/auth/signup`
-- [ ] 2.7 Three feature cards read as the shared-availability / overlap / push-on-confirm strip; all icons render; no Astro-starter references remain
-- [ ] 2.8 Landing looks visually cohesive with the tavern palette from Phase 1 — no orphan purple/blue elements
-- [ ] 2.9 Mobile viewport (~375px): hero + CTAs + cards all readable; cards stack, no horizontal scroll
+- [x] 2.6 `/` renders "GameSlot" centered as the hero; description reads as the two-sentence product tagline; CTAs still route to `/auth/signin` and `/auth/signup` — 2ca7db7
+- [x] 2.7 Three feature cards read as the shared-availability / overlap / push-on-confirm strip; all icons render; no Astro-starter references remain — 2ca7db7
+- [x] 2.8 Landing looks visually cohesive with the tavern palette from Phase 1 — no orphan purple/blue elements — 2ca7db7
+- [x] 2.9 Mobile viewport (~375px): hero + CTAs + cards all readable; cards stack, no horizontal scroll — 2ca7db7
 
 ### Phase 3: App-wide utility sweep
 
 #### Automated
 
-- [ ] 3.1 Type-checking passes: `npm run typecheck`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Zero old-palette references remain under `src/` (or every remaining hit is a documented exception): `grep -rEn "bg-cosmic|from-blue-|via-purple-|to-pink-|from-purple-|to-purple-|bg-purple-[0-9]|bg-blue-[0-9]|bg-indigo-[0-9]|text-purple-[0-9]|text-blue-|ring-purple-|border-purple-|border-white/[0-9]|bg-white/[0-9]" src/`
-- [ ] 3.4 `npm run build` succeeds and emits a `dist/` bundle without warnings related to unknown Tailwind classes
+- [x] 3.1 Type-checking passes: `npm run typecheck`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Zero old-palette references remain under `src/` (or every remaining hit is a documented exception): `grep -rEn "bg-cosmic|from-blue-|via-purple-|to-pink-|from-purple-|to-purple-|bg-purple-[0-9]|bg-blue-[0-9]|bg-indigo-[0-9]|text-purple-[0-9]|text-blue-|ring-purple-|border-purple-|border-white/[0-9]|bg-white/[0-9]" src/`
+- [x] 3.4 `npm run build` succeeds and emits a `dist/` bundle without warnings related to unknown Tailwind classes
 
 #### Manual
 
-- [ ] 3.5 Every route renders in the tavern palette on both desktop and mobile widths (`/`, `/auth/signin`, `/auth/signup`, `/groups`, `/groups/new`, `/groups/[id]`, `/install`, `/invite/[token]`)
-- [ ] 3.6 No page is visibly stuck in the old cosmic palette
-- [ ] 3.7 Group calendar's overlap heat map reads correctly — higher-overlap slots are more saturated than lower ones
-- [ ] 3.8 Auth forms remain usable — inputs have adequate contrast, focus states visible, error text legible
-- [ ] 3.9 PWA install screen (Android Chrome or desktop Chrome) shows the tavern background/theme colour end-to-end
+- [x] 3.5 Every route renders in the tavern palette on both desktop and mobile widths (`/`, `/auth/signin`, `/auth/signup`, `/groups`, `/groups/new`, `/groups/[id]`, `/install`, `/invite/[token]`)
+- [x] 3.6 No page is visibly stuck in the old cosmic palette
+- [x] 3.7 Group calendar's overlap heat map reads correctly — higher-overlap slots are more saturated than lower ones
+- [x] 3.8 Auth forms remain usable — inputs have adequate contrast, focus states visible, error text legible
+- [x] 3.9 PWA install screen (Android Chrome or desktop Chrome) shows the tavern background/theme colour end-to-end

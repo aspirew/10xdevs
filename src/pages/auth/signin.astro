@@ -6,9 +6,11 @@ const error = Astro.url.searchParams.get("error");
 
 <Layout title="Sign in">
   <div class="bg-tavern flex min-h-screen items-center justify-center p-4">
-    <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+    <div
+      class="w-full max-w-sm rounded-2xl border border-amber-100/10 bg-amber-100/10 p-8 text-amber-50 backdrop-blur-xl"
+    >
       <h1
-        class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent"
+        class="mb-6 bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-center text-2xl font-bold text-transparent"
       >
         Sign in
       </h1>
@@ -28,13 +30,13 @@ const error = Astro.url.searchParams.get("error");
       <form method="POST" action="/api/auth/oauth/google">
         <button
           type="submit"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-amber-100/20 bg-amber-100/10 px-4 py-2 text-sm font-medium text-amber-50 transition-colors hover:bg-amber-100/20"
         >
           Continue with Google
         </button>
       </form>
-      <p class="mt-4 text-center text-sm text-blue-100/60">
-        Don't have an account? <a href="/auth/signup" class="text-purple-300 hover:underline">Sign up</a>
+      <p class="mt-4 text-center text-sm text-amber-100/60">
+        Don't have an account? <a href="/auth/signup" class="text-amber-300 hover:underline">Sign up</a>
       </p>
     </div>
   </div>

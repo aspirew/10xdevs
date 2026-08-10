@@ -15,9 +15,9 @@ const error = Astro.url.searchParams.get("error");
     <div class="mx-auto max-w-md">
       <Topbar />
 
-      <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+      <div class="rounded-2xl border border-amber-100/10 bg-amber-100/10 p-8 text-amber-50 backdrop-blur-xl">
         <h1
-          class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent"
+          class="mb-6 bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-center text-2xl font-bold text-transparent"
         >
           New group
         </h1>
@@ -36,25 +36,25 @@ const error = Astro.url.searchParams.get("error");
         }
         <form method="POST" action="/api/groups" class="space-y-4">
           <div>
-            <label for="name" class="mb-1 block text-sm font-medium text-blue-100/80">Group name</label>
+            <label for="name" class="mb-1 block text-sm font-medium text-amber-100/80">Group name</label>
             <input
               id="name"
               name="name"
               type="text"
               required
               placeholder="e.g. Game Night Crew"
-              class="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-blue-100/30 focus:border-purple-400 focus:outline-none"
+              class="w-full rounded-lg border border-amber-100/20 bg-amber-100/5 px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:border-amber-300 focus:outline-none"
             />
           </div>
           <button
             type="submit"
-            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-emerald-950 transition-colors hover:bg-amber-400"
           >
             Create group
           </button>
         </form>
-        <p class="mt-4 text-center text-sm text-blue-100/60">
-          <a href="/groups" class="text-purple-300 hover:underline">Back to your groups</a>
+        <p class="mt-4 text-center text-sm text-amber-100/60">
+          <a href="/groups" class="text-amber-300 hover:underline">Back to your groups</a>
         </p>
       </div>
     </div>

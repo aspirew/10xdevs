@@ -45,17 +45,17 @@ export function InstallPushBanner() {
       : "Enable notifications so you don't miss confirmed sessions.";
 
   return (
-    <div className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-white backdrop-blur-xl">
+    <div className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-amber-100/10 bg-amber-100/10 p-4 text-sm text-amber-50 backdrop-blur-xl">
       <div>
         <p>{message}</p>
-        <a href="/install" className="mt-1 inline-block text-purple-300 underline">
+        <a href="/install" className="mt-1 inline-block text-amber-300 underline">
           Open install page →
         </a>
       </div>
       <button
         type="button"
         onClick={handleDismiss}
-        className="rounded-md px-2 py-1 text-blue-100/70 hover:bg-white/10 hover:text-white"
+        className="rounded-md px-2 py-1 text-amber-100/70 hover:bg-amber-100/10 hover:text-amber-50"
         aria-label="Dismiss install prompt"
       >
         ✕

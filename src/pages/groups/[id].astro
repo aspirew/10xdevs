@@ -117,11 +117,11 @@ if (group && admin) {
 
       {
         !group && (
-          <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
-            <h1 class="mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+          <div class="rounded-2xl border border-amber-100/10 bg-amber-100/10 p-8 text-center text-amber-50 backdrop-blur-xl">
+            <h1 class="mb-4 bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-2xl font-bold text-transparent">
               Group not found
             </h1>
-            <p class="text-sm text-blue-100/70">This group doesn't exist or you're not a member of it.</p>
+            <p class="text-sm text-amber-100/70">This group doesn't exist or you're not a member of it.</p>
             {groupError && (
               <p
                 role="alert"
@@ -133,7 +133,7 @@ if (group && admin) {
                 <span>{groupError}</span>
               </p>
             )}
-            <a href="/groups" class="mt-6 inline-block text-sm text-purple-300 hover:underline">
+            <a href="/groups" class="mt-6 inline-block text-sm text-amber-300 hover:underline">
               Back to your groups
             </a>
           </div>
@@ -143,11 +143,11 @@ if (group && admin) {
       {
         group && (
           <div class="space-y-6">
-            <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl">
-              <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+            <div class="rounded-2xl border border-amber-100/10 bg-amber-100/10 p-6 text-amber-50 backdrop-blur-xl">
+              <h1 class="bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-3xl font-bold text-transparent">
                 {group.name}
               </h1>
-              <p class="mt-1 text-sm text-blue-100/60">
+              <p class="mt-1 text-sm text-amber-100/60">
                 {members.length} {members.length === 1 ? "member" : "members"}
               </p>
             </div>
@@ -164,22 +164,22 @@ if (group && admin) {
               </p>
             )}
 
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white backdrop-blur-xl">
+            <div class="rounded-2xl border border-amber-100/10 bg-amber-100/5 p-6 text-amber-50 backdrop-blur-xl">
               <h2 class="mb-3 text-lg font-semibold">Members</h2>
-              <ul class="space-y-1 text-sm text-blue-100/80">
+              <ul class="space-y-1 text-sm text-amber-100/80">
                 {members.map((m) => (
-                  <li class:list={m.id === user.id ? "font-semibold text-white" : ""}>
+                  <li class:list={m.id === user.id ? "font-semibold text-amber-50" : ""}>
                     {m.email ?? m.id}
-                    {m.id === user.id && <span class="ml-2 text-xs text-blue-100/50">(you)</span>}
-                    {m.id === group.created_by && <span class="ml-2 text-xs text-purple-300">creator</span>}
+                    {m.id === user.id && <span class="ml-2 text-xs text-amber-100/50">(you)</span>}
+                    {m.id === group.created_by && <span class="ml-2 text-xs text-amber-300">creator</span>}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white backdrop-blur-xl">
+            <div class="rounded-2xl border border-amber-100/10 bg-amber-100/5 p-6 text-amber-50 backdrop-blur-xl">
               <h2 class="mb-3 text-lg font-semibold">Invite link</h2>
-              <p class="mb-3 text-sm text-blue-100/60">
+              <p class="mb-3 text-sm text-amber-100/60">
                 Share this link with friends. Anyone signed in who opens it joins this group.
               </p>
               <div class="flex gap-2">
@@ -188,19 +188,19 @@ if (group && admin) {
                   type="text"
                   readonly
                   value={inviteUrl}
-                  class="flex-1 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none"
+                  class="flex-1 rounded-lg border border-amber-100/20 bg-amber-100/5 px-3 py-2 text-sm text-amber-50 focus:outline-none"
                 />
                 <button
                   id="copy-invite"
                   type="button"
-                  class="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+                  class="inline-flex items-center justify-center rounded-lg border border-amber-100/20 bg-amber-100/10 px-3 py-2 text-sm font-medium text-amber-50 transition-colors hover:bg-amber-100/20"
                 >
                   Copy
                 </button>
               </div>
               {isCreator && (
                 <form method="POST" action={`/api/groups/${group.id}/regenerate-invite`} class="mt-4">
-                  <button type="submit" class="text-sm text-purple-300 hover:underline">
+                  <button type="submit" class="text-sm text-amber-300 hover:underline">
                     Regenerate invite link (invalidates the current one)
                   </button>
                 </form>
@@ -208,14 +208,14 @@ if (group && admin) {
             </div>
 
             {nextSession && (
-              <div class="rounded-2xl border border-purple-400/30 bg-purple-500/15 p-6 text-white backdrop-blur-xl">
-                <h2 class="mb-1 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-lg font-semibold text-transparent">
+              <div class="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-6 text-amber-50 backdrop-blur-xl">
+                <h2 class="mb-1 bg-gradient-to-r from-amber-300 to-orange-200 bg-clip-text text-lg font-semibold text-transparent">
                   Next session
                 </h2>
-                <p class="text-base text-white">
+                <p class="text-base text-amber-50">
                   {formatSlotLabel(nextSession.slot_date, nextSession.slot_hour)} · {nextSession.location}
                 </p>
-                <p class="mt-1 text-xs text-blue-100/70">Hosted by {nextSession.host_email ?? "a member"}</p>
+                <p class="mt-1 text-xs text-amber-100/70">Hosted by {nextSession.host_email ?? "a member"}</p>
               </div>
             )}
 
@@ -237,8 +237,8 @@ if (group && admin) {
               />
             )}
 
-            <p class="text-center text-sm text-blue-100/60">
-              <a href="/groups" class="text-purple-300 hover:underline">
+            <p class="text-center text-sm text-amber-100/60">
+              <a href="/groups" class="text-amber-300 hover:underline">
                 Back to your groups
               </a>
             </p>

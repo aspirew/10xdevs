@@ -44,14 +44,16 @@ if (group && user && admin) {
 
 <Layout title={group ? `Join "${group.name}"` : "Invite"}>
   <div class="bg-tavern flex min-h-screen items-center justify-center p-4">
-    <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+    <div
+      class="w-full max-w-sm rounded-2xl border border-amber-100/10 bg-amber-100/10 p-8 text-amber-50 backdrop-blur-xl"
+    >
       {
         !group && (
           <>
-            <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
+            <h1 class="mb-6 bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-center text-2xl font-bold text-transparent">
               Invite not found
             </h1>
-            <p class="mb-4 text-center text-sm text-blue-100/70">This invite link is invalid or has been revoked.</p>
+            <p class="mb-4 text-center text-sm text-amber-100/70">This invite link is invalid or has been revoked.</p>
             {lookupError && (
               <p
                 role="alert"
@@ -63,7 +65,7 @@ if (group && user && admin) {
                 <span>{lookupError}</span>
               </p>
             )}
-            <a href="/" class="block text-center text-sm text-purple-300 hover:underline">
+            <a href="/" class="block text-center text-sm text-amber-300 hover:underline">
               Go home
             </a>
           </>
@@ -72,15 +74,15 @@ if (group && user && admin) {
       {
         group && !user && (
           <>
-            <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
+            <h1 class="mb-6 bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-center text-2xl font-bold text-transparent">
               Join "{group.name}"
             </h1>
-            <p class="mb-6 text-center text-sm text-blue-100/70">Sign in to accept this invite.</p>
+            <p class="mb-6 text-center text-sm text-amber-100/70">Sign in to accept this invite.</p>
             <form method="POST" action="/api/auth/oauth/google">
               <input type="hidden" name="next" value={`/invite/${token}`} />
               <button
                 type="submit"
-                class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-amber-100/20 bg-amber-100/10 px-4 py-2 text-sm font-medium text-amber-50 transition-colors hover:bg-amber-100/20"
               >
                 Continue with Google
               </button>
