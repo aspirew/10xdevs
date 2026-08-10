@@ -366,10 +366,10 @@ Nothing to migrate — no data model, no persistence, no environment change. `gi
 
 #### Automated
 
-- [x] 1.1 Type-checking passes: `npm run typecheck`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 No `bg-cosmic` references remain in `src/`: `grep -rn "bg-cosmic" src/` returns zero hits
-- [x] 1.4 New utility is defined: `grep -n "bg-tavern" src/styles/global.css` returns exactly one hit at the utility declaration
+- [x] 1.1 Type-checking passes: `npm run typecheck` — bf88099
+- [x] 1.2 Linting passes: `npm run lint` — bf88099
+- [x] 1.3 No `bg-cosmic` references remain in `src/`: `grep -rn "bg-cosmic" src/` returns zero hits — bf88099
+- [x] 1.4 New utility is defined: `grep -n "bg-tavern" src/styles/global.css` returns exactly one hit at the utility declaration — bf88099
 
 #### Manual
 
@@ -382,11 +382,11 @@ Nothing to migrate — no data model, no persistence, no environment change. `gi
 
 #### Automated
 
-- [ ] 2.1 Type-checking passes: `npm run typecheck`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 No `bg-cosmic`, `from-blue-200`, `via-purple-200`, `to-pink-200`, `bg-purple-600`, `bg-purple-500`, `bg-blue-500`, `bg-indigo-400`, `text-purple-300`, or `text-blue-100` utilities remain in `src/components/Welcome.astro`
-- [ ] 2.4 Hero renders the string "GameSlot" (one word); "Game Slot" returns zero hits
-- [ ] 2.5 No stock Astro-starter phrases remain in `src/components/Welcome.astro`
+- [x] 2.1 Type-checking passes: `npm run typecheck`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 No `bg-cosmic`, `from-blue-200`, `via-purple-200`, `to-pink-200`, `bg-purple-600`, `bg-purple-500`, `bg-blue-500`, `bg-indigo-400`, `text-purple-300`, or `text-blue-100` utilities remain in `src/components/Welcome.astro`
+- [x] 2.4 Hero renders the string "GameSlot" (one word); "Game Slot" returns zero hits
+- [x] 2.5 No stock Astro-starter phrases remain in `src/components/Welcome.astro`
 
 #### Manual
 
