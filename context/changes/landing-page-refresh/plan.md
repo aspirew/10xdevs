@@ -399,15 +399,15 @@ Nothing to migrate — no data model, no persistence, no environment change. `gi
 
 #### Automated
 
-- [x] 3.1 Type-checking passes: `npm run typecheck`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Zero old-palette references remain under `src/` (or every remaining hit is a documented exception): `grep -rEn "bg-cosmic|from-blue-|via-purple-|to-pink-|from-purple-|to-purple-|bg-purple-[0-9]|bg-blue-[0-9]|bg-indigo-[0-9]|text-purple-[0-9]|text-blue-|ring-purple-|border-purple-|border-white/[0-9]|bg-white/[0-9]" src/`
-- [x] 3.4 `npm run build` succeeds and emits a `dist/` bundle without warnings related to unknown Tailwind classes
+- [x] 3.1 Type-checking passes: `npm run typecheck` — f4e7c6e
+- [x] 3.2 Linting passes: `npm run lint` — f4e7c6e
+- [x] 3.3 Zero old-palette references remain under `src/` (or every remaining hit is a documented exception): `grep -rEn "bg-cosmic|from-blue-|via-purple-|to-pink-|from-purple-|to-purple-|bg-purple-[0-9]|bg-blue-[0-9]|bg-indigo-[0-9]|text-purple-[0-9]|text-blue-|ring-purple-|border-purple-|border-white/[0-9]|bg-white/[0-9]" src/` — f4e7c6e
+- [x] 3.4 `npm run build` succeeds and emits a `dist/` bundle without warnings related to unknown Tailwind classes — f4e7c6e
 
 #### Manual
 
-- [x] 3.5 Every route renders in the tavern palette on both desktop and mobile widths (`/`, `/auth/signin`, `/auth/signup`, `/groups`, `/groups/new`, `/groups/[id]`, `/install`, `/invite/[token]`)
-- [x] 3.6 No page is visibly stuck in the old cosmic palette
-- [x] 3.7 Group calendar's overlap heat map reads correctly — higher-overlap slots are more saturated than lower ones
-- [x] 3.8 Auth forms remain usable — inputs have adequate contrast, focus states visible, error text legible
-- [x] 3.9 PWA install screen (Android Chrome or desktop Chrome) shows the tavern background/theme colour end-to-end
+- [x] 3.5 Every route renders in the tavern palette on both desktop and mobile widths (`/`, `/auth/signin`, `/auth/signup`, `/groups`, `/groups/new`, `/groups/[id]`, `/install`, `/invite/[token]`) — f4e7c6e
+- [x] 3.6 No page is visibly stuck in the old cosmic palette — f4e7c6e
+- [x] 3.7 Group calendar's overlap heat map reads correctly — higher-overlap slots are more saturated than lower ones — f4e7c6e
+- [x] 3.8 Auth forms remain usable — inputs have adequate contrast, focus states visible, error text legible — f4e7c6e
+- [x] 3.9 PWA install screen (Android Chrome or desktop Chrome) shows the tavern background/theme colour end-to-end — f4e7c6e
