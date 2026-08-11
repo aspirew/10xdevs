@@ -308,9 +308,12 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                     // Per-viewer host lookup: `.find` guarantees each host reaches
                     // their own ✗ affordance regardless of whether other hosts
                     // share the day. If viewer hosts any session on this day → ✗.
-                    // Else if viewer has a future-marked hour → ✓ (S-03 confirm).
-                    // Else → empty.
+                    // Else if any session already exists on this day → empty
+                    // (avoids a ✓ that would either 409 on same-hour or spawn a
+                    // confusing second session on the day). Else if viewer has a
+                    // future-marked hour → ✓ (S-03 confirm). Else → empty.
                     const myHostedSessionOnDay = sessions.find((s) => s.slot_date === day && s.iAmHost);
+                    const anySessionOnDay = sessions.some((s) => s.slot_date === day);
                     if (myHostedSessionOnDay) {
                       return (
                         <td className="px-1 py-0.5 text-center">
@@ -327,7 +330,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                         </td>
                       );
                     }
-                    if (myStart !== undefined && !isPastSlot(day, myStart)) {
+                    if (!anySessionOnDay && myStart !== undefined && !isPastSlot(day, myStart)) {
                       const confirmSlotHour = myStart;
                       return (
                         <td className="px-1 py-0.5 text-center">
