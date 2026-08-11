@@ -340,22 +340,22 @@ Well under Vercel's 300s default timeout. The extended `getUpcomingSessions` que
 
 #### Automated
 
-- [x] 3.1 `npm run typecheck` passes
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 `npm run build` succeeds
-- [x] 3.4 Files exist: `src/components/CancelSessionDialog.tsx`; `GroupCalendar.tsx` uses `confirmedSessions` array prop
-- [x] 3.5 `groups/[id].astro` imports `getUpcomingSessions` and passes `confirmedSessions` array to `<GroupCalendar>`
+- [x] 3.1 `npm run typecheck` passes — b0161be
+- [x] 3.2 `npm run lint` passes — b0161be
+- [x] 3.3 `npm run build` succeeds — b0161be
+- [x] 3.4 Files exist: `src/components/CancelSessionDialog.tsx`; `GroupCalendar.tsx` uses `confirmedSessions` array prop — b0161be
+- [x] 3.5 `groups/[id].astro` imports `getUpcomingSessions` and passes `confirmedSessions` array to `<GroupCalendar>` — b0161be
 
 #### Manual
 
-- [x] 3.6 Two accounts (A + B), one group: A confirms S1 Sat 15:00 "Cafe" → both members see ★ on the cell; A sees ✗ on Sat row; B sees no button on Sat row
-- [x] 3.7 B confirms S2 Sun 18:00 "Anna's" → both members see ★ on both cells; banner still shows S1 (earlier); B sees ✗ on Sun; A sees no button on Sun
-- [x] 3.8 A clicks ✗ Sat → CancelSessionDialog shows slot + location + "Everyone will get a notification"; "Keep session" closes dialog, "Cancel session" submits
-- [x] 3.9 Successful cancel → both A and B receive push "Session cancelled · Sat, Oct 3 · 3pm · Cafe" (tab closed on B); page reloads; banner now S2; ★ gone from Sat cell; if A had marked availability on Sat, ✓ returns
-- [x] 3.10 With zero future sessions after cancel: banner disappears; ✓ shows normally on all marked-availability days
-- [x] 3.11 Non-host UI has no ✗ on other members' session days; can still confirm own sessions on days they mark
-- [x] 3.12 Attempt to cancel already-cancelled session (race via two tabs) → dialog shows 404 error inline, stays open
-- [x] 3.13 Server logs on Vercel show one `session <id> → cancel fanout: sent=X failed=Y deleted=Z` line per cancel
-- [x] 3.14 Lighthouse PWA audit passes on the group page (no regression)
-- [x] 3.15 Production smoke on `https://10xdevs-lilac.vercel.app` covers 3.6–3.13 end-to-end with real devices
-- [x] 3.16 Tag production deploy as `prod-<date>-multi-cancel`
+- [x] 3.6 Two accounts (A + B), one group: A confirms S1 Sat 15:00 "Cafe" → both members see ★ on the cell; A sees ✗ on Sat row; B sees no button on Sat row — b0161be
+- [x] 3.7 B confirms S2 Sun 18:00 "Anna's" → both members see ★ on both cells; banner still shows S1 (earlier); B sees ✗ on Sun; A sees no button on Sun — b0161be
+- [x] 3.8 A clicks ✗ Sat → CancelSessionDialog shows slot + location + "Everyone will get a notification"; "Keep session" closes dialog, "Cancel session" submits — b0161be
+- [x] 3.9 Successful cancel → both A and B receive push "Session cancelled · Sat, Oct 3 · 3pm · Cafe" (tab closed on B); page reloads; banner now S2; ★ gone from Sat cell; if A had marked availability on Sat, ✓ returns — b0161be
+- [x] 3.10 With zero future sessions after cancel: banner disappears; ✓ shows normally on all marked-availability days — b0161be
+- [x] 3.11 Non-host UI has no ✗ on other members' session days; can still confirm own sessions on days they mark — b0161be
+- [x] 3.12 Attempt to cancel already-cancelled session (race via two tabs) → dialog shows 404 error inline, stays open — b0161be
+- [x] 3.13 Server logs on Vercel show one `session <id> → cancel fanout: sent=X failed=Y deleted=Z` line per cancel — b0161be
+- [x] 3.14 Lighthouse PWA audit passes on the group page (no regression) — b0161be
+- [x] 3.15 Production smoke on `https://10xdevs-lilac.vercel.app` covers 3.6–3.13 end-to-end with real devices — b0161be
+- [x] 3.16 Tag production deploy as `prod-<date>-multi-cancel` — b0161be
