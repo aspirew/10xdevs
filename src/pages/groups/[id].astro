@@ -4,7 +4,7 @@ import Topbar from "@/components/Topbar.astro";
 import GroupCalendar from "@/components/GroupCalendar";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getAvailabilityWindow, type AvailabilityWindow } from "@/lib/availability";
-import { getNextUpcomingSession, type SessionWithHost } from "@/lib/sessions";
+import { getUpcomingSessions, type SessionWithHost } from "@/lib/sessions";
 import { addDays, formatDate, formatSlotLabel, WINDOW_DAYS } from "@/lib/calendar";
 
 const user = Astro.locals.user;
@@ -94,17 +94,19 @@ if (group && admin) {
   }
 }
 
-// S-03: next-upcoming-session banner. Reads the earliest confirmed session at
-// slot_date >= today; if none, `nextSession` stays null and the banner is skipped.
-// Non-fatal like the calendar read.
-let nextSession: SessionWithHost | null = null;
+// All future confirmed sessions for this group, ordered earliest first. The
+// banner reads [0] (single next-upcoming session); the calendar receives the
+// whole array so every ★ badge in the visible window renders. Non-fatal read
+// like the calendar prep — if the query throws, the page still loads.
+let upcomingSessions: SessionWithHost[] = [];
 if (group && admin) {
   try {
-    nextSession = await getNextUpcomingSession(admin, group.id);
+    upcomingSessions = await getUpcomingSessions(admin, group.id);
   } catch {
-    // Non-fatal: no banner if the read fails; the rest of the page renders.
+    // Non-fatal: banner + badges skipped if the read fails; page still renders.
   }
 }
+const nextSession: SessionWithHost | null = upcomingSessions.length > 0 ? upcomingSessions[0] : null;
 ---
 
 <Layout title={group ? group.name : "Group"}>

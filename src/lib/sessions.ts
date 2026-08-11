@@ -25,14 +25,12 @@ export interface SessionWithHost extends Session {
   host_email: string | null;
 }
 
-// Reads the earliest confirmed session at slot_date >= today for this group and
-// resolves the host's email via auth.admin.getUserById so the banner can render
-// "Hosted by <email>". Returns null when no future session exists.
-//
-// v1 banner scope is "next upcoming session only" — LIMIT 1 matches that.
-// Multi-session UX is deferred until real friend groups start confirming more
-// than one future session at a time.
-export async function getNextUpcomingSession(admin: SupabaseClient, groupId: string): Promise<SessionWithHost | null> {
+// Reads all future confirmed sessions for a group (slot_date >= today), ordered
+// earliest-first, with each host's email resolved in parallel via
+// auth.admin.getUserById. The banner reads [0] (single next-upcoming session);
+// the calendar renders ★ badges for every entry in the visible window and
+// drives the per-viewer host-only ✗ cancel affordance.
+export async function getUpcomingSessions(admin: SupabaseClient, groupId: string): Promise<SessionWithHost[]> {
   const today = formatDate(new Date());
   const { data: rows, error } = await admin
     .from("sessions")
@@ -40,12 +38,16 @@ export async function getNextUpcomingSession(admin: SupabaseClient, groupId: str
     .eq("group_id", groupId)
     .gte("slot_date", today)
     .order("slot_date", { ascending: true })
-    .order("slot_hour", { ascending: true })
-    .limit(1);
+    .order("slot_hour", { ascending: true });
   if (error) throw new Error(error.message);
-  const row = (rows as Session[] | null)?.[0];
-  if (!row) return null;
+  const sessions = (rows as Session[] | null) ?? [];
+  if (sessions.length === 0) return [];
 
-  const { data: hostRecord } = await admin.auth.admin.getUserById(row.host_user_id);
-  return { ...row, host_email: hostRecord.user?.email ?? null };
+  const hostEmails = await Promise.all(
+    sessions.map(async (s) => {
+      const { data: hostRecord } = await admin.auth.admin.getUserById(s.host_user_id);
+      return hostRecord.user?.email ?? null;
+    }),
+  );
+  return sessions.map((s, i) => ({ ...s, host_email: hostEmails[i] }));
 }

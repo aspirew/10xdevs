@@ -302,39 +302,39 @@ Well under Vercel's 300s default timeout. The extended `getUpcomingSessions` que
 
 #### Automated
 
-- [x] 1.1 Migration file exists at `supabase/migrations/<timestamp>_sessions_host_delete.sql`
-- [x] 1.2 `npm run typecheck` passes
-- [x] 1.3 `npm run lint` passes
-- [x] 1.4 `npm run build` succeeds
+- [x] 1.1 Migration file exists at `supabase/migrations/<timestamp>_sessions_host_delete.sql` — 56e626e
+- [x] 1.2 `npm run typecheck` passes — 56e626e
+- [x] 1.3 `npm run lint` passes — 56e626e
+- [x] 1.4 `npm run build` succeeds — 56e626e
 
 #### Manual
 
-- [x] 1.5 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl`
-- [x] 1.6 Studio: `\d+ public.sessions` shows the new DELETE policy in the RLS block
-- [x] 1.7 Studio anon smoke: DELETE against a real row as anon → permission denied
-- [x] 1.8 Studio postgres smoke: policy expression parses cleanly on a test row
-- [x] 1.9 `git log -- supabase/migrations/` shows the new file after phase-end commit
+- [x] 1.5 Migration applied via `npx supabase db push --linked` against `dchurjcpgzuoyunjsokl` — 56e626e
+- [x] 1.6 Studio: `\d+ public.sessions` shows the new DELETE policy in the RLS block — 56e626e
+- [x] 1.7 Studio anon smoke: DELETE against a real row as anon → permission denied — 56e626e
+- [x] 1.8 Studio postgres smoke: policy expression parses cleanly on a test row — 56e626e
+- [x] 1.9 `git log -- supabase/migrations/` shows the new file after phase-end commit — 56e626e
 
 ### Phase 2: `getUpcomingSessions` Helper + DELETE Endpoint
 
 #### Automated
 
-- [ ] 2.1 `npm run typecheck` passes
-- [ ] 2.2 `npm run lint` passes
-- [ ] 2.3 `npm run build` succeeds
-- [ ] 2.4 Files exist: `src/pages/api/groups/[id]/sessions/[session_id].ts`; `getUpcomingSessions` exported; `getNextUpcomingSession` removed
+- [x] 2.1 `npm run typecheck` passes
+- [x] 2.2 `npm run lint` passes
+- [x] 2.3 `npm run build` succeeds
+- [x] 2.4 Files exist: `src/pages/api/groups/[id]/sessions/[session_id].ts`; `getUpcomingSessions` exported; `getNextUpcomingSession` removed
 
 #### Manual
 
-- [ ] 2.5 `curl -X DELETE` (host cookies) valid → 200 `{ok:true}`; row gone in Studio; server logs show `session <sid> → cancel fanout: sent=X failed=Y deleted=Z`
-- [ ] 2.6 Real push notification arrives on host's iOS + Android PWAs (tab closed) within seconds
-- [ ] 2.7 Repeated DELETE on the same session_id → 404 `{error: "Session not found"}`
-- [ ] 2.8 DELETE as signed-in member who is NOT the session's host → 403 `{error: "Only the session host can cancel"}`
-- [ ] 2.9 DELETE as signed-in user who is NOT a group member → 403 `{error: "Not a member of this group"}`
-- [ ] 2.10 Unauthenticated DELETE → 401
-- [ ] 2.11 DELETE with nonexistent session_id → 404
-- [ ] 2.12 DELETE with session_id from a different group than the URL's `[id]` → 404
-- [ ] 2.13 `getUpcomingSessions(admin, groupId)` returns an ordered array with resolved `host_email`s; returns `[]` for a group with no future sessions
+- [x] 2.5 `curl -X DELETE` (host cookies) valid → 200 `{ok:true}`; row gone in Studio; server logs show `session <sid> → cancel fanout: sent=X failed=Y deleted=Z`
+- [x] 2.6 Real push notification arrives on host's iOS + Android PWAs (tab closed) within seconds
+- [x] 2.7 Repeated DELETE on the same session_id → 404 `{error: "Session not found"}`
+- [x] 2.8 DELETE as signed-in member who is NOT the session's host → 403 `{error: "Only the session host can cancel"}`
+- [x] 2.9 DELETE as signed-in user who is NOT a group member → 403 `{error: "Not a member of this group"}`
+- [x] 2.10 Unauthenticated DELETE → 401
+- [x] 2.11 DELETE with nonexistent session_id → 404
+- [x] 2.12 DELETE with session_id from a different group than the URL's `[id]` → 404
+- [x] 2.13 `getUpcomingSessions(admin, groupId)` returns an ordered array with resolved `host_email`s; returns `[]` for a group with no future sessions
 
 ### Phase 3: Multi-Badge UI + Cancel Dialog + Column Ungate
 
