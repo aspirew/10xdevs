@@ -173,20 +173,20 @@ Include a short leading comment noting: "Visible calendar window length in days.
 
 #### Automated
 
-- [x] 1.1 `npm run typecheck` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` succeeds
+- [x] 1.1 `npm run typecheck` passes — 81209d4
+- [x] 1.2 `npm run lint` passes — 81209d4
+- [x] 1.3 `npm run build` succeeds — 81209d4
 
 #### Manual
 
-- [ ] 1.4 Desktop `/groups/<id>`: 7 day rows × 11 hour columns; headers 10..20
-- [ ] 1.5 Prev / Today / Next nav shifts by exactly one week
-- [ ] 1.6 No browser tooltip on any availability cell or on the ✓ button
-- [ ] 1.7 Above-grid paragraph is a single line: date-range · N members · threshold reminder — no "tap an hour" text
-- [ ] 1.8 Mobile viewport 375px: grid fits without pre-grid hint paragraph consuming vertical space
-- [ ] 1.9 S-02 tap-to-toggle still works on future cells
-- [ ] 1.10 S-03 ✓ button still appears + opens the confirm dialog on marked days
-- [ ] 1.11 Aria-labels still populated on availability cells + confirm button (screen-reader / DevTools inspection)
-- [ ] 1.12 Confirmed-session ★ badge still renders on the confirmed cell within the visible window
-- [ ] 1.13 SSR payload for `/groups/<id>` contains at most 7 days of availability rows
-- [ ] 1.14 Prod smoke on `https://10xdevs-lilac.vercel.app` after push confirms all of the above
+- [x] 1.4 Desktop `/groups/<id>`: 7 day rows × 11 hour columns; headers 10..20 — 81209d4
+- [x] 1.5 Prev / Today / Next nav shifts by exactly one week — 81209d4
+- [x] 1.6 No browser tooltip on any availability cell or on the ✓ button — 81209d4
+- [x] 1.7 Above-grid paragraph is a single line: date-range · N members · threshold reminder — no "tap an hour" text — 81209d4
+- [x] 1.8 Mobile viewport 375px: grid fits without pre-grid hint paragraph consuming vertical space — 81209d4
+- [x] 1.9 S-02 tap-to-toggle still works on future cells — 81209d4
+- [x] 1.10 S-03 ✓ button still appears + opens the confirm dialog on marked days — 81209d4
+- [x] 1.11 Aria-labels still populated on availability cells + confirm button (screen-reader / DevTools inspection) — 81209d4
+- [x] 1.12 Confirmed-session ★ badge still renders on the confirmed cell within the visible window — 81209d4
+- [x] 1.13 SSR payload for `/groups/<id>` contains at most 7 days of availability rows — 81209d4
+- [x] 1.14 Prod smoke on `https://10xdevs-lilac.vercel.app` after push confirms all of the above — 81209d4
