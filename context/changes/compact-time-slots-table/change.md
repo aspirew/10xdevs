@@ -1,7 +1,7 @@
 ---
 change_id: compact-time-slots-table
 title: Compact the time-slots table for mobile
-status: implemented
+status: impl_reviewed
 created: 2026-08-11
 updated: 2026-08-11
 archived_at: null

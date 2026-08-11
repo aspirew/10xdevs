@@ -37,7 +37,7 @@ interface Props {
 // Mobile-first NFR: default to 10:00–20:00 inclusive (11 columns). The data model still
 // allows hours 0–23; this is purely a render choice — pre-existing marks outside this
 // range keep contributing to overlap counts under the start-hour semantic but have no
-// visible cell to toggle. See plan-brief "Open Risks & Assumptions".
+// visible cell to toggle.
 const VISIBLE_HOUR_START = 10;
 const VISIBLE_HOUR_END = 21;
 
