@@ -75,7 +75,7 @@ export function ConfirmSessionDialog({ groupId, slot, onCancel, onConfirmed }: P
         if (!open) onCancel();
       }}
     >
-      <DialogContent className="text-slate-900">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Confirm session</DialogTitle>
           <DialogDescription>
