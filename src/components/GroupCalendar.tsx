@@ -200,10 +200,9 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
         </div>
       </div>
       <p className="mb-3 text-xs text-amber-100/60">
-        {start} → {endStr} · {data.groupSize} {data.groupSize === 1 ? "member" : "members"} · highlight at ≥{" "}
-        {data.threshold}/{data.groupSize} available
+        {start} → {endStr}
       </p>
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="text-xs">
           <thead>
             <tr>
@@ -332,8 +331,16 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
             })}
           </tbody>
         </table>
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-amber-950/40 backdrop-blur-sm">
+            <span
+              aria-label="Loading"
+              role="status"
+              className="h-8 w-8 animate-spin rounded-full border-2 border-amber-100/30 border-t-amber-300"
+            />
+          </div>
+        )}
       </div>
-      {loading && <p className="mt-2 text-center text-xs text-amber-100/40">Loading…</p>}
       <ConfirmSessionDialog
         key={dialogSlot ? `${dialogSlot.slot_date}|${dialogSlot.slot_hour}` : "closed"}
         groupId={groupId}

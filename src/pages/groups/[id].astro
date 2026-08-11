@@ -2,7 +2,6 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import GroupCalendar from "@/components/GroupCalendar";
-import { InstallPushBanner } from "@/components/InstallPushBanner";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getAvailabilityWindow, type AvailabilityWindow } from "@/lib/availability";
 import { getNextUpcomingSession, type SessionWithHost } from "@/lib/sessions";
@@ -113,8 +112,6 @@ if (group && admin) {
     <div class="mx-auto max-w-2xl">
       <Topbar />
 
-      <InstallPushBanner client:load />
-
       {
         !group && (
           <div class="rounded-2xl border border-amber-100/10 bg-amber-100/10 p-8 text-center text-amber-50 backdrop-blur-xl">
@@ -164,6 +161,36 @@ if (group && admin) {
               </p>
             )}
 
+            {nextSession && (
+              <div class="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-6 text-amber-50 backdrop-blur-xl">
+                <h2 class="mb-1 bg-gradient-to-r from-amber-300 to-orange-200 bg-clip-text text-lg font-semibold text-transparent">
+                  Next session
+                </h2>
+                <p class="text-base text-amber-50">
+                  {formatSlotLabel(nextSession.slot_date, nextSession.slot_hour)} · {nextSession.location}
+                </p>
+                <p class="mt-1 text-xs text-amber-100/70">Hosted by {nextSession.host_email ?? "a member"}</p>
+              </div>
+            )}
+
+            {calendarInitial && (
+              <GroupCalendar
+                client:load
+                groupId={group.id}
+                initial={calendarInitial}
+                initialStart={startStr}
+                confirmedSession={
+                  nextSession
+                    ? {
+                        slot_date: nextSession.slot_date,
+                        slot_hour: nextSession.slot_hour,
+                        iAmHost: nextSession.host_user_id === user.id,
+                      }
+                    : null
+                }
+              />
+            )}
+
             <div class="rounded-2xl border border-amber-100/10 bg-amber-100/5 p-6 text-amber-50 backdrop-blur-xl">
               <h2 class="mb-3 text-lg font-semibold">Members</h2>
               <ul class="space-y-1 text-sm text-amber-100/80">
@@ -206,36 +233,6 @@ if (group && admin) {
                 </form>
               )}
             </div>
-
-            {nextSession && (
-              <div class="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-6 text-amber-50 backdrop-blur-xl">
-                <h2 class="mb-1 bg-gradient-to-r from-amber-300 to-orange-200 bg-clip-text text-lg font-semibold text-transparent">
-                  Next session
-                </h2>
-                <p class="text-base text-amber-50">
-                  {formatSlotLabel(nextSession.slot_date, nextSession.slot_hour)} · {nextSession.location}
-                </p>
-                <p class="mt-1 text-xs text-amber-100/70">Hosted by {nextSession.host_email ?? "a member"}</p>
-              </div>
-            )}
-
-            {calendarInitial && (
-              <GroupCalendar
-                client:load
-                groupId={group.id}
-                initial={calendarInitial}
-                initialStart={startStr}
-                confirmedSession={
-                  nextSession
-                    ? {
-                        slot_date: nextSession.slot_date,
-                        slot_hour: nextSession.slot_hour,
-                        iAmHost: nextSession.host_user_id === user.id,
-                      }
-                    : null
-                }
-              />
-            )}
 
             <p class="text-center text-sm text-amber-100/60">
               <a href="/groups" class="text-amber-300 hover:underline">
