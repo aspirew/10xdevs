@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { AvailabilityWindow, MemberMark } from "@/lib/availability";
-import { addDays, formatDate, parseDate, isPastSlot } from "@/lib/calendar";
+import { addDays, formatDate, parseDate, isPastSlot, WINDOW_DAYS } from "@/lib/calendar";
 import { ConfirmSessionDialog } from "@/components/ConfirmSessionDialog";
 
 // React is imported to mirror SignInForm.tsx — under `jsx: "react-jsx"` + Astro 6 + Vite,
@@ -32,13 +32,14 @@ interface Props {
   confirmedSession?: ConfirmedSessionSlot | null;
 }
 
-// Fixed 4-week window length. Nav by ±7 days; "Today" resets to today.
-const WINDOW_DAYS = 28;
-// Mobile-first NFR + 24-hour grid is too wide for a phone. Default to 8am–midnight
-// (16 columns). The data model still allows hours 0–23; this is purely a render choice.
-// Adjust if a phone test shows otherwise.
-const VISIBLE_HOUR_START = 8;
-const VISIBLE_HOUR_END = 24;
+// Window length lives in @/lib/calendar so groups/[id].astro's SSR fetch shares it.
+// Nav step derives from WINDOW_DAYS so Prev/Next always slides by exactly one window.
+// Mobile-first NFR: default to 10:00–20:00 inclusive (11 columns). The data model still
+// allows hours 0–23; this is purely a render choice — pre-existing marks outside this
+// range keep contributing to overlap counts under the start-hour semantic but have no
+// visible cell to toggle. See plan-brief "Open Risks & Assumptions".
+const VISIBLE_HOUR_START = 10;
+const VISIBLE_HOUR_END = 21;
 
 // Start-hour semantic (PRD FR-006): one row per (group, user, slot_date) — `slot_hour`
 // is the member's START time for that day; availability lasts to end-of-day. The wedge
@@ -174,7 +175,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
         <div className="flex gap-1">
           <button
             type="button"
-            onClick={() => void navTo(formatDate(addDays(parseDate(start), -7)))}
+            onClick={() => void navTo(formatDate(addDays(parseDate(start), -WINDOW_DAYS)))}
             disabled={loading}
             className="rounded-md border border-amber-100/20 bg-amber-100/10 px-3 py-1 text-xs font-medium text-amber-50 transition-colors hover:bg-amber-100/20 disabled:opacity-50"
           >
@@ -190,7 +191,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
           </button>
           <button
             type="button"
-            onClick={() => void navTo(formatDate(addDays(parseDate(start), 7)))}
+            onClick={() => void navTo(formatDate(addDays(parseDate(start), WINDOW_DAYS)))}
             disabled={loading}
             className="rounded-md border border-amber-100/20 bg-amber-100/10 px-3 py-1 text-xs font-medium text-amber-50 transition-colors hover:bg-amber-100/20 disabled:opacity-50"
           >
@@ -200,9 +201,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
       </div>
       <p className="mb-3 text-xs text-amber-100/60">
         {start} → {endStr} · {data.groupSize} {data.groupSize === 1 ? "member" : "members"} · highlight at ≥{" "}
-        {data.threshold}/{data.groupSize} available · tap an hour to mark when you&apos;re free from then on; tap again
-        to clear that day
-        {showConfirmColumn && " · tap the ✓ at the right of a day to confirm a session at your marked hour"}
+        {data.threshold}/{data.groupSize} available
       </p>
       <div className="overflow-x-auto">
         <table className="text-xs">
@@ -285,7 +284,6 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                         onClick={past ? undefined : () => void toggle(day, h)}
                         className={cellClass}
                         aria-label={isConfirmed ? `${label} · session confirmed` : label}
-                        title={label}
                       >
                         {isConfirmed ? (
                           <span className="flex flex-col items-center leading-none">
@@ -320,7 +318,6 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                             });
                           }}
                           aria-label={`Confirm session on ${day} at ${myStart}:00`}
-                          title={`Confirm session at ${myStart}:00`}
                           className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-amber-100/20 bg-amber-100/10 text-xs text-amber-50 transition-colors hover:border-emerald-300 hover:bg-emerald-500/30 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                         >
                           ✓

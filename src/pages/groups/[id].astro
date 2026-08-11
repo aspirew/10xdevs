@@ -6,7 +6,7 @@ import { InstallPushBanner } from "@/components/InstallPushBanner";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getAvailabilityWindow, type AvailabilityWindow } from "@/lib/availability";
 import { getNextUpcomingSession, type SessionWithHost } from "@/lib/sessions";
-import { addDays, formatDate, formatSlotLabel } from "@/lib/calendar";
+import { addDays, formatDate, formatSlotLabel, WINDOW_DAYS } from "@/lib/calendar";
 
 const user = Astro.locals.user;
 if (!user) {
@@ -82,7 +82,7 @@ const isCreator = group?.created_by === user.id;
 // with the admin client. (RLS isn't the gate on this project — see lessons.md.)
 const today = new Date();
 const startStr = formatDate(today);
-const endStr = formatDate(addDays(today, 27));
+const endStr = formatDate(addDays(today, WINDOW_DAYS - 1));
 let calendarInitial: AvailabilityWindow | null = null;
 if (group && admin) {
   try {

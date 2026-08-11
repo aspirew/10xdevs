@@ -2,6 +2,11 @@
 // Single-TZ-per-group (PRD §Access Control) means all dates are treated as local clock
 // values, no UTC conversion. See plan.md → "Past-slot boundary (UI-only)".
 
+// Visible calendar window length in days. Used by GroupCalendar (render loop + nav step)
+// and by groups/[id].astro (SSR initial availability fetch). Bump both consumers in one
+// place if the window changes.
+export const WINDOW_DAYS = 7;
+
 export function formatDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
