@@ -319,43 +319,43 @@ Well under Vercel's 300s default timeout. The extended `getUpcomingSessions` que
 
 #### Automated
 
-- [x] 2.1 `npm run typecheck` passes
-- [x] 2.2 `npm run lint` passes
-- [x] 2.3 `npm run build` succeeds
-- [x] 2.4 Files exist: `src/pages/api/groups/[id]/sessions/[session_id].ts`; `getUpcomingSessions` exported; `getNextUpcomingSession` removed
+- [x] 2.1 `npm run typecheck` passes — c2aab9e
+- [x] 2.2 `npm run lint` passes — c2aab9e
+- [x] 2.3 `npm run build` succeeds — c2aab9e
+- [x] 2.4 Files exist: `src/pages/api/groups/[id]/sessions/[session_id].ts`; `getUpcomingSessions` exported; `getNextUpcomingSession` removed — c2aab9e
 
 #### Manual
 
-- [x] 2.5 `curl -X DELETE` (host cookies) valid → 200 `{ok:true}`; row gone in Studio; server logs show `session <sid> → cancel fanout: sent=X failed=Y deleted=Z`
-- [x] 2.6 Real push notification arrives on host's iOS + Android PWAs (tab closed) within seconds
-- [x] 2.7 Repeated DELETE on the same session_id → 404 `{error: "Session not found"}`
-- [x] 2.8 DELETE as signed-in member who is NOT the session's host → 403 `{error: "Only the session host can cancel"}`
-- [x] 2.9 DELETE as signed-in user who is NOT a group member → 403 `{error: "Not a member of this group"}`
-- [x] 2.10 Unauthenticated DELETE → 401
-- [x] 2.11 DELETE with nonexistent session_id → 404
-- [x] 2.12 DELETE with session_id from a different group than the URL's `[id]` → 404
-- [x] 2.13 `getUpcomingSessions(admin, groupId)` returns an ordered array with resolved `host_email`s; returns `[]` for a group with no future sessions
+- [x] 2.5 `curl -X DELETE` (host cookies) valid → 200 `{ok:true}`; row gone in Studio; server logs show `session <sid> → cancel fanout: sent=X failed=Y deleted=Z` — c2aab9e
+- [x] 2.6 Real push notification arrives on host's iOS + Android PWAs (tab closed) within seconds — c2aab9e
+- [x] 2.7 Repeated DELETE on the same session_id → 404 `{error: "Session not found"}` — c2aab9e
+- [x] 2.8 DELETE as signed-in member who is NOT the session's host → 403 `{error: "Only the session host can cancel"}` — c2aab9e
+- [x] 2.9 DELETE as signed-in user who is NOT a group member → 403 `{error: "Not a member of this group"}` — c2aab9e
+- [x] 2.10 Unauthenticated DELETE → 401 — c2aab9e
+- [x] 2.11 DELETE with nonexistent session_id → 404 — c2aab9e
+- [x] 2.12 DELETE with session_id from a different group than the URL's `[id]` → 404 — c2aab9e
+- [x] 2.13 `getUpcomingSessions(admin, groupId)` returns an ordered array with resolved `host_email`s; returns `[]` for a group with no future sessions — c2aab9e
 
 ### Phase 3: Multi-Badge UI + Cancel Dialog + Column Ungate
 
 #### Automated
 
-- [ ] 3.1 `npm run typecheck` passes
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `npm run build` succeeds
-- [ ] 3.4 Files exist: `src/components/CancelSessionDialog.tsx`; `GroupCalendar.tsx` uses `confirmedSessions` array prop
-- [ ] 3.5 `groups/[id].astro` imports `getUpcomingSessions` and passes `confirmedSessions` array to `<GroupCalendar>`
+- [x] 3.1 `npm run typecheck` passes
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `npm run build` succeeds
+- [x] 3.4 Files exist: `src/components/CancelSessionDialog.tsx`; `GroupCalendar.tsx` uses `confirmedSessions` array prop
+- [x] 3.5 `groups/[id].astro` imports `getUpcomingSessions` and passes `confirmedSessions` array to `<GroupCalendar>`
 
 #### Manual
 
-- [ ] 3.6 Two accounts (A + B), one group: A confirms S1 Sat 15:00 "Cafe" → both members see ★ on the cell; A sees ✗ on Sat row; B sees no button on Sat row
-- [ ] 3.7 B confirms S2 Sun 18:00 "Anna's" → both members see ★ on both cells; banner still shows S1 (earlier); B sees ✗ on Sun; A sees no button on Sun
-- [ ] 3.8 A clicks ✗ Sat → CancelSessionDialog shows slot + location + "Everyone will get a notification"; "Keep session" closes dialog, "Cancel session" submits
-- [ ] 3.9 Successful cancel → both A and B receive push "Session cancelled · Sat, Oct 3 · 3pm · Cafe" (tab closed on B); page reloads; banner now S2; ★ gone from Sat cell; if A had marked availability on Sat, ✓ returns
-- [ ] 3.10 With zero future sessions after cancel: banner disappears; ✓ shows normally on all marked-availability days
-- [ ] 3.11 Non-host UI has no ✗ on other members' session days; can still confirm own sessions on days they mark
-- [ ] 3.12 Attempt to cancel already-cancelled session (race via two tabs) → dialog shows 404 error inline, stays open
-- [ ] 3.13 Server logs on Vercel show one `session <id> → cancel fanout: sent=X failed=Y deleted=Z` line per cancel
-- [ ] 3.14 Lighthouse PWA audit passes on the group page (no regression)
-- [ ] 3.15 Production smoke on `https://10xdevs-lilac.vercel.app` covers 3.6–3.13 end-to-end with real devices
-- [ ] 3.16 Tag production deploy as `prod-<date>-multi-cancel`
+- [x] 3.6 Two accounts (A + B), one group: A confirms S1 Sat 15:00 "Cafe" → both members see ★ on the cell; A sees ✗ on Sat row; B sees no button on Sat row
+- [x] 3.7 B confirms S2 Sun 18:00 "Anna's" → both members see ★ on both cells; banner still shows S1 (earlier); B sees ✗ on Sun; A sees no button on Sun
+- [x] 3.8 A clicks ✗ Sat → CancelSessionDialog shows slot + location + "Everyone will get a notification"; "Keep session" closes dialog, "Cancel session" submits
+- [x] 3.9 Successful cancel → both A and B receive push "Session cancelled · Sat, Oct 3 · 3pm · Cafe" (tab closed on B); page reloads; banner now S2; ★ gone from Sat cell; if A had marked availability on Sat, ✓ returns
+- [x] 3.10 With zero future sessions after cancel: banner disappears; ✓ shows normally on all marked-availability days
+- [x] 3.11 Non-host UI has no ✗ on other members' session days; can still confirm own sessions on days they mark
+- [x] 3.12 Attempt to cancel already-cancelled session (race via two tabs) → dialog shows 404 error inline, stays open
+- [x] 3.13 Server logs on Vercel show one `session <id> → cancel fanout: sent=X failed=Y deleted=Z` line per cancel
+- [x] 3.14 Lighthouse PWA audit passes on the group page (no regression)
+- [x] 3.15 Production smoke on `https://10xdevs-lilac.vercel.app` covers 3.6–3.13 end-to-end with real devices
+- [x] 3.16 Tag production deploy as `prod-<date>-multi-cancel`

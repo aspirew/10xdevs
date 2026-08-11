@@ -182,15 +182,13 @@ const nextSession: SessionWithHost | null = upcomingSessions.length > 0 ? upcomi
                   groupId={group.id}
                   initial={calendarInitial}
                   initialStart={startStr}
-                  confirmedSession={
-                    nextSession
-                      ? {
-                          slot_date: nextSession.slot_date,
-                          slot_hour: nextSession.slot_hour,
-                          iAmHost: nextSession.host_user_id === user.id,
-                        }
-                      : null
-                  }
+                  confirmedSessions={upcomingSessions.map((s) => ({
+                    id: s.id,
+                    slot_date: s.slot_date,
+                    slot_hour: s.slot_hour,
+                    location: s.location,
+                    iAmHost: s.host_user_id === user.id,
+                  }))}
                 />
               </div>
             )}

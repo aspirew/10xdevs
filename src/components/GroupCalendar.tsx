@@ -2,19 +2,22 @@ import React, { useState } from "react";
 import type { AvailabilityWindow, MemberMark } from "@/lib/availability";
 import { addDays, formatDate, parseDate, isPastSlot, WINDOW_DAYS } from "@/lib/calendar";
 import { ConfirmSessionDialog } from "@/components/ConfirmSessionDialog";
+import { CancelSessionDialog } from "@/components/CancelSessionDialog";
 
 // React is imported to mirror SignInForm.tsx — under `jsx: "react-jsx"` + Astro 6 + Vite,
 // omitting it can cause `jsxDEV is not a function` during dev hydration when the JSX
 // dev-runtime resolution loses its grip after a build→dev switch.
 void React;
 
-interface ConfirmedSessionSlot {
+interface ConfirmedSession {
+  id: string;
   slot_date: string;
   slot_hour: number;
-  // True iff the current viewer is the host of this confirmed session. Gates the
-  // per-row ✓ confirm button: once a session exists, only its host may propose
-  // additional sessions (non-hosts hide the button entirely). Computed SSR-side
-  // in groups/[id].astro from nextSession.host_user_id vs Astro.locals.user.id.
+  location: string;
+  // True iff the current viewer is the host of this specific session. Drives
+  // per-row placement of the ✗ cancel button. Computed SSR-side in
+  // groups/[id].astro from session.host_user_id vs Astro.locals.user.id — the
+  // client never sees other members' host_user_ids.
   iAmHost: boolean;
 }
 
@@ -29,7 +32,7 @@ interface Props {
   groupId: string;
   initial: AvailabilityWindow;
   initialStart: string;
-  confirmedSession?: ConfirmedSessionSlot | null;
+  confirmedSessions?: ConfirmedSession[];
 }
 
 // Window length lives in @/lib/calendar so groups/[id].astro's SSR fetch shares it.
@@ -46,20 +49,18 @@ const VISIBLE_HOUR_END = 21;
 // surfaces "from what hour onward does most of the group overlap?" — overlap count at
 // (date, hour) = members whose start_hour <= hour on that date.
 
-export default function GroupCalendar({ groupId, initial, initialStart, confirmedSession }: Props) {
+export default function GroupCalendar({ groupId, initial, initialStart, confirmedSessions }: Props) {
   const [start, setStart] = useState(initialStart);
   const [data, setData] = useState<AvailabilityWindow>(initial);
   const [loading, setLoading] = useState(false);
   const [failedDates, setFailedDates] = useState<Set<string>>(new Set());
   const [dialogSlot, setDialogSlot] = useState<DialogSlot | null>(null);
+  const [cancelSession, setCancelSession] = useState<ConfirmedSession | null>(null);
 
   const startDate = parseDate(start);
   const endStr = formatDate(addDays(startDate, WINDOW_DAYS - 1));
 
-  // Whole confirm column disappears for non-hosts once a session exists. Before
-  // any session is confirmed anyone can propose one (they'd become the host);
-  // once someone has, only that host retains the affordance.
-  const showConfirmColumn = confirmedSession == null || confirmedSession.iAmHost;
+  const sessions = confirmedSessions ?? [];
 
   // Derived lookups. The wire shape gives "mine" vs "others" already split — no
   // user_ids on the client. We just need fast date-keyed lookups for render.
@@ -212,7 +213,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                   {h}
                 </th>
               ))}
-              {showConfirmColumn && <th className="px-1 py-0.5 text-center font-normal text-amber-100/60">✓</th>}
+              <th className="px-1 py-0.5 text-center font-normal text-amber-100/60"> </th>
             </tr>
           </thead>
           <tbody>
@@ -239,7 +240,7 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                     const isHot = count > 0 && count >= data.threshold;
                     const isMyStart = myStart === h;
                     const iAmAvailable = myStart !== undefined && myStart <= h;
-                    const isConfirmed = confirmedSession?.slot_date === day && confirmedSession.slot_hour === h;
+                    const isConfirmed = sessions.some((s) => s.slot_date === day && s.slot_hour === h);
                     // Color channels are separated so the eye can read them independently:
                     //   amber   = YOU (your start + your range from start to end-of-day)
                     //   emerald = GROUP overlap met (FR-008 wedge signal)
@@ -303,29 +304,57 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
                       </td>
                     );
                   })}
-                  {showConfirmColumn && (
-                    <td className="px-1 py-0.5 text-center">
-                      {myStart !== undefined && !isPastSlot(day, myStart) ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDialogSlot({
-                              slot_date: day,
-                              slot_hour: myStart,
-                              countAtSlot: countAt(day, myStart),
-                              groupSize: data.groupSize,
-                            });
-                          }}
-                          aria-label={`Confirm session on ${day} at ${myStart}:00`}
-                          className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-amber-100/20 bg-amber-100/10 text-xs text-amber-50 transition-colors hover:border-emerald-300 hover:bg-emerald-500/30 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-                        >
-                          ✓
-                        </button>
-                      ) : (
+                  {(() => {
+                    // Per-viewer host lookup: `.find` guarantees each host reaches
+                    // their own ✗ affordance regardless of whether other hosts
+                    // share the day. If viewer hosts any session on this day → ✗.
+                    // Else if viewer has a future-marked hour → ✓ (S-03 confirm).
+                    // Else → empty.
+                    const myHostedSessionOnDay = sessions.find((s) => s.slot_date === day && s.iAmHost);
+                    if (myHostedSessionOnDay) {
+                      return (
+                        <td className="px-1 py-0.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCancelSession(myHostedSessionOnDay);
+                            }}
+                            aria-label={`Cancel session on ${day} at ${myHostedSessionOnDay.slot_hour}:00`}
+                            className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-amber-100/20 bg-amber-100/10 text-xs text-amber-50 transition-colors hover:border-red-300 hover:bg-red-500/30 focus:ring-2 focus:ring-red-400 focus:outline-none"
+                          >
+                            ✗
+                          </button>
+                        </td>
+                      );
+                    }
+                    if (myStart !== undefined && !isPastSlot(day, myStart)) {
+                      const confirmSlotHour = myStart;
+                      return (
+                        <td className="px-1 py-0.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDialogSlot({
+                                slot_date: day,
+                                slot_hour: confirmSlotHour,
+                                countAtSlot: countAt(day, confirmSlotHour),
+                                groupSize: data.groupSize,
+                              });
+                            }}
+                            aria-label={`Confirm session on ${day} at ${confirmSlotHour}:00`}
+                            className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-amber-100/20 bg-amber-100/10 text-xs text-amber-50 transition-colors hover:border-emerald-300 hover:bg-emerald-500/30 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                          >
+                            ✓
+                          </button>
+                        </td>
+                      );
+                    }
+                    return (
+                      <td className="px-1 py-0.5 text-center">
                         <span className="inline-block h-6 w-6" aria-hidden="true" />
-                      )}
-                    </td>
-                  )}
+                      </td>
+                    );
+                  })()}
                 </tr>
               );
             })}
@@ -347,6 +376,26 @@ export default function GroupCalendar({ groupId, initial, initialStart, confirme
         slot={dialogSlot}
         onCancel={() => {
           setDialogSlot(null);
+        }}
+        onConfirmed={() => {
+          window.location.reload();
+        }}
+      />
+      <CancelSessionDialog
+        key={cancelSession ? `cancel-${cancelSession.id}` : "cancel-closed"}
+        groupId={groupId}
+        session={
+          cancelSession
+            ? {
+                id: cancelSession.id,
+                slot_date: cancelSession.slot_date,
+                slot_hour: cancelSession.slot_hour,
+                location: cancelSession.location,
+              }
+            : null
+        }
+        onCancel={() => {
+          setCancelSession(null);
         }}
         onConfirmed={() => {
           window.location.reload();
