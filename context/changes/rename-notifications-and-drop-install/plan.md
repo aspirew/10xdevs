@@ -122,22 +122,22 @@ Update `Topbar.astro` to swap the "Notifications" label → "Settings" in the si
 
 #### Automated
 
-- [x] 1.1 `npm run typecheck` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` succeeds
-- [x] 1.4 `grep -c "Notifications" src/components/Topbar.astro` returns 0
-- [x] 1.5 `grep -c "Settings" src/components/Topbar.astro` returns 1
-- [x] 1.6 `grep -c 'href="/install"' src/components/Topbar.astro` returns 1 (was 2)
-- [x] 1.7 `grep -c "Install GameSlot" src/pages/install.astro` returns 1 (subtitle preserved)
-- [x] 1.8 `grep -c 'title="GameSlot Settings"' src/pages/install.astro` returns 1
+- [x] 1.1 `npm run typecheck` passes — 1fe5f1b
+- [x] 1.2 `npm run lint` passes — 1fe5f1b
+- [x] 1.3 `npm run build` succeeds — 1fe5f1b
+- [x] 1.4 `grep -c "Notifications" src/components/Topbar.astro` returns 0 — 1fe5f1b
+- [x] 1.5 `grep -c "Settings" src/components/Topbar.astro` returns 1 — 1fe5f1b
+- [x] 1.6 `grep -c 'href="/install"' src/components/Topbar.astro` returns 1 (was 2) — 1fe5f1b
+- [x] 1.7 `grep -c "Install GameSlot" src/pages/install.astro` returns 1 (subtitle preserved) — 1fe5f1b
+- [x] 1.8 `grep -c 'title="GameSlot Settings"' src/pages/install.astro` returns 1 — 1fe5f1b
 
 #### Manual
 
-- [x] 1.9 Signed-in on `/groups`: Topbar reads `[logo] | Groups | Settings | Sign out`
-- [x] 1.10 Clicking "Settings" routes to `/install`; hero reads "Settings"; browser tab title reads "GameSlot Settings"
-- [x] 1.11 Settings page still shows install-instruction cards + notifications card + NotificationControls
-- [x] 1.12 Signed-out Topbar has no Install link; only Sign in and Sign up on the right
-- [x] 1.13 Direct visit to `/install` while signed-out: page renders; NotificationControls prompts to sign in
-- [x] 1.14 Sign-in `next=/install` round-trip works (sign in → back to `/install` now titled Settings)
-- [x] 1.15 No console errors on any of the above
-- [x] 1.16 Tag production deploy as `prod-<date>-settings-rename`
+- [x] 1.9 Signed-in on `/groups`: Topbar reads `[logo] | Groups | Settings | Sign out` — 1fe5f1b
+- [x] 1.10 Clicking "Settings" routes to `/install`; hero reads "Settings"; browser tab title reads "GameSlot Settings" — 1fe5f1b
+- [x] 1.11 Settings page still shows install-instruction cards + notifications card + NotificationControls — 1fe5f1b
+- [x] 1.12 Signed-out Topbar has no Install link; only Sign in and Sign up on the right — 1fe5f1b
+- [x] 1.13 Direct visit to `/install` while signed-out: page renders; NotificationControls prompts to sign in — 1fe5f1b
+- [x] 1.14 Sign-in `next=/install` round-trip works (sign in → back to `/install` now titled Settings) — 1fe5f1b
+- [x] 1.15 No console errors on any of the above — 1fe5f1b
+- [x] 1.16 Tag production deploy as `prod-<date>-settings-rename` — 1fe5f1b
