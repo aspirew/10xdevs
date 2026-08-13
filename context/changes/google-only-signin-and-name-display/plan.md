@@ -208,13 +208,13 @@ Delete `/auth/signup` and its React form; remove Sign-up references from Topbar,
 
 #### Manual
 
-- [ ] 1.11 Prod direct-visit to `/auth/signup` returns 404
-- [ ] 1.12 Signed-out landing shows the "Never miss a chance…" caption and a single "Sign in" button (no Sign up)
-- [ ] 1.13 Signed-out Topbar reads `[logo] | Sign in`
-- [ ] 1.14 Signed-in landing shows "Hello \<Google name\>" and a "Go to groups" button that routes to `/groups`
-- [ ] 1.15 On `/groups/<id>`: members list shows `Name (email)` per row; `(you)` and `creator` badges preserved
-- [ ] 1.16 Members without `full_name` fall back to just email (no parens)
-- [ ] 1.17 Sign-in flow works end-to-end (unauth → Sign in → Google → back on landing signed-in)
-- [ ] 1.18 Signed-in Topbar unchanged: `[logo] | Groups | Settings | Sign out`
-- [ ] 1.19 No console errors on any of the above
-- [ ] 1.20 Tag production deploy as `prod-<date>-google-only-auth`
+- [x] 1.11 Prod direct-visit to `/auth/signup` returns 404 — a0251a7
+- [x] 1.12 Signed-out landing shows the "Never miss a chance…" caption and a single "Sign in" button (no Sign up) — a0251a7
+- [x] 1.13 Signed-out Topbar reads `[logo] | Sign in` — a0251a7
+- [x] 1.14 Signed-in landing shows "Hello \<Google name\>" and a "Go to groups" button that routes to `/groups` — a0251a7
+- [x] 1.15 On `/groups/<id>`: members list shows `Name (email)` per row; `(you)` and `creator` badges preserved — a0251a7
+- [x] 1.16 Members without `full_name` fall back to just email (no parens) — a0251a7
+- [x] 1.17 Sign-in flow works end-to-end (unauth → Sign in → Google → back on landing signed-in) — a0251a7
+- [x] 1.18 Signed-in Topbar unchanged: `[logo] | Groups | Settings | Sign out` — a0251a7
+- [x] 1.19 No console errors on any of the above — a0251a7
+- [x] 1.20 Tag production deploy as `prod-<date>-google-only-auth` — prod-2026-08-14-google-only-auth

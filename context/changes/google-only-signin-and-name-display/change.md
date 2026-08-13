@@ -1,7 +1,7 @@
 ---
 change_id: google-only-signin-and-name-display
 title: Google-only sign-in, conditional landing CTA, member name display
-status: implementing
+status: implemented
 created: 2026-08-14
 updated: 2026-08-14
 archived_at: null
