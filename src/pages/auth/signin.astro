@@ -1,6 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 
+if (Astro.locals.user) {
+  return Astro.rewrite("/404");
+}
+
 const error = Astro.url.searchParams.get("error");
 ---
 
