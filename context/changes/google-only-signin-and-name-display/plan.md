@@ -195,16 +195,16 @@ Delete `/auth/signup` and its React form; remove Sign-up references from Topbar,
 
 #### Automated
 
-- [x] 1.1 `npm run typecheck` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` succeeds
-- [x] 1.4 `grep -rn "Sign up" src/` returns 0
-- [x] 1.5 `grep -rn "signup" src/` returns 0
-- [x] 1.6 `grep -rn "SignUpForm\|SignInForm" src/` returns 0
-- [x] 1.7 `ls src/pages/auth/` does not include `signup.astro`
-- [x] 1.8 `src/components/auth/SignUpForm.tsx` and `src/components/auth/SignInForm.tsx` do not exist
-- [x] 1.9 `grep -c "user_metadata" src/components/Welcome.astro` returns ≥ 1
-- [x] 1.10 `grep -c "full_name" src/pages/groups/[id].astro` returns ≥ 2
+- [x] 1.1 `npm run typecheck` passes — 8821b56
+- [x] 1.2 `npm run lint` passes — 8821b56
+- [x] 1.3 `npm run build` succeeds — 8821b56
+- [x] 1.4 `grep -rn "Sign up" src/` returns 0 — 8821b56
+- [x] 1.5 `grep -rn "signup" src/` returns 0 — 8821b56
+- [x] 1.6 `grep -rn "SignUpForm\|SignInForm" src/` returns 0 — 8821b56
+- [x] 1.7 `ls src/pages/auth/` does not include `signup.astro` — 8821b56
+- [x] 1.8 `src/components/auth/SignUpForm.tsx` and `src/components/auth/SignInForm.tsx` do not exist — 8821b56
+- [x] 1.9 `grep -c "user_metadata" src/components/Welcome.astro` returns ≥ 1 — 8821b56
+- [x] 1.10 `grep -c "full_name" src/pages/groups/[id].astro` returns ≥ 2 — 8821b56
 
 #### Manual
 
