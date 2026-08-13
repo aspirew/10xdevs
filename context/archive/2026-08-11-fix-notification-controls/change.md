@@ -1,10 +1,10 @@
 ---
 change_id: fix-notification-controls
 title: Fix invisible unsubscribe button and remove test-notification button
-status: implemented
+status: archived
 created: 2026-08-11
 updated: 2026-08-13
-archived_at: null
+archived_at: 2026-08-13T15:47:01Z
 ---
 
 ## Notes
