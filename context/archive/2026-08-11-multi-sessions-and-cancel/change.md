@@ -1,10 +1,10 @@
 ---
 change_id: multi-sessions-and-cancel
 title: Multiple sessions per group + host-only session cancellation
-status: implemented
+status: archived
 created: 2026-08-11
-updated: 2026-08-11
-archived_at: null
+updated: 2026-08-13
+archived_at: 2026-08-13T15:19:48Z
 ---
 
 ## Notes
