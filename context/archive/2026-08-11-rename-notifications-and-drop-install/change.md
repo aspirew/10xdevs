@@ -1,10 +1,10 @@
 ---
 change_id: rename-notifications-and-drop-install
 title: Rename "Notifications" menu to "Settings"; drop signed-out "Install" item
-status: implemented
+status: archived
 created: 2026-08-11
 updated: 2026-08-13
-archived_at: null
+archived_at: 2026-08-13T21:50:44Z
 ---
 
 ## Notes
