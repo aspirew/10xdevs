@@ -116,22 +116,22 @@ Replace the left-side text in `Topbar.astro` with an `<a href="/"><img src="/log
 
 #### Automated
 
-- [x] 1.1 `npm run typecheck` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` succeeds
-- [x] 1.4 `grep -c "src=\"/logo.png\"" src/components/Topbar.astro` returns 2 (one per auth-state branch)
-- [x] 1.5 `grep -c "{user.email}" src/components/Topbar.astro` returns 0
-- [x] 1.6 `grep -c "Not signed in" src/components/Topbar.astro` returns 0
+- [x] 1.1 `npm run typecheck` passes — e941935
+- [x] 1.2 `npm run lint` passes — e941935
+- [x] 1.3 `npm run build` succeeds — e941935
+- [x] 1.4 `grep -c "src=\"/logo.png\"" src/components/Topbar.astro` returns 2 (one per auth-state branch) — e941935
+- [x] 1.5 `grep -c "{user.email}" src/components/Topbar.astro` returns 0 — e941935
+- [x] 1.6 `grep -c "Not signed in" src/components/Topbar.astro` returns 0 — e941935
 
 #### Manual
 
-- [x] 1.7 `/groups` while signed in: logo appears on left of Topbar, nav actions unchanged on right
-- [x] 1.8 Clicking the logo routes to `/`
-- [x] 1.9 Hovering the logo dims it slightly (opacity 0.9)
-- [x] 1.10 On `/`, clicking the logo triggers a same-page reload with no error
-- [x] 1.11 Signed-out `/install`: logo appears and routes to `/`
-- [x] 1.12 All Topbar-having pages (`/groups`, `/groups/<id>`, `/groups/new`, `/install`) render the logo
-- [x] 1.13 Keyboard Tab focus reaches the logo; screen reader announces "GameSlot" (from alt text)
-- [x] 1.14 Mobile viewport 375px: logo fits without wrapping or overflowing Topbar height
-- [x] 1.15 No console errors on any of the above
-- [x] 1.16 Tag production deploy as `prod-<date>-logo`
+- [x] 1.7 `/groups` while signed in: logo appears on left of Topbar, nav actions unchanged on right — e941935
+- [x] 1.8 Clicking the logo routes to `/` — e941935
+- [x] 1.9 Hovering the logo dims it slightly (opacity 0.9) — e941935
+- [x] 1.10 On `/`, clicking the logo triggers a same-page reload with no error — e941935
+- [x] 1.11 Signed-out `/install`: logo appears and routes to `/` — e941935
+- [x] 1.12 All Topbar-having pages (`/groups`, `/groups/<id>`, `/groups/new`, `/install`) render the logo — e941935
+- [x] 1.13 Keyboard Tab focus reaches the logo; screen reader announces "GameSlot" (from alt text) — e941935
+- [x] 1.14 Mobile viewport 375px: logo fits without wrapping or overflowing Topbar height — e941935
+- [x] 1.15 No console errors on any of the above — e941935
+- [x] 1.16 Tag production deploy as `prod-<date>-logo` — e941935
