@@ -1,9 +1,9 @@
 ---
 change_id: logo-links-to-landing
 title: App logo in header links back to the landing page
-status: new
+status: implementing
 created: 2026-08-11
-updated: 2026-08-11
+updated: 2026-08-13
 archived_at: null
 ---
 
