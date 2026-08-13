@@ -1,10 +1,10 @@
 ---
 change_id: landing-page-refresh
 title: Landing page copy, hero layout, and visual identity refresh
-status: implemented
+status: archived
 created: 2026-08-11
-updated: 2026-08-11
-archived_at: null
+updated: 2026-08-13
+archived_at: 2026-08-13T21:51:00Z
 ---
 
 ## Notes
