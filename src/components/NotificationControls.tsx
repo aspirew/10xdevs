@@ -1,29 +1,15 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  getPushStatus,
-  subscribeCurrentUser,
-  unsubscribeCurrentUser,
-  sendTestPush,
-  type PushStatus,
-} from "@/lib/push-client";
+import { getPushStatus, subscribeCurrentUser, unsubscribeCurrentUser, type PushStatus } from "@/lib/push-client";
 
 interface Props {
   isSignedIn: boolean;
-}
-
-interface TestResult {
-  sent: number;
-  failed?: number;
-  deleted?: number;
-  error?: string;
 }
 
 export function NotificationControls({ isSignedIn }: Props) {
   const [status, setStatus] = useState<PushStatus | "loading">("loading");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [testResult, setTestResult] = useState<TestResult | null>(null);
 
   useEffect(() => {
     const refresh = () => {
@@ -51,16 +37,6 @@ export function NotificationControls({ isSignedIn }: Props) {
     const result = await unsubscribeCurrentUser();
     if (!result.ok) setError(result.reason ?? "Unsubscribe failed");
     setStatus(await getPushStatus());
-    setTestResult(null);
-    setBusy(false);
-  };
-
-  const handleTest = async () => {
-    setBusy(true);
-    setError(null);
-    const result = await sendTestPush();
-    if (result.error) setError(result.error);
-    setTestResult(result);
     setBusy(false);
   };
 
@@ -116,19 +92,14 @@ export function NotificationControls({ isSignedIn }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => void handleTest()} disabled={busy}>
-          {busy ? "Sending…" : "Send test notification"}
-        </Button>
-        <Button variant="outline" onClick={() => void handleUnsubscribe()} disabled={busy}>
+        <Button
+          onClick={() => void handleUnsubscribe()}
+          disabled={busy}
+          className="border border-amber-100/20 bg-amber-100/10 text-amber-50 hover:bg-amber-100/20"
+        >
           Unsubscribe this device
         </Button>
       </div>
-      {testResult && !testResult.error && (
-        <p className="text-muted-foreground text-sm">
-          Sent to {testResult.sent} device{testResult.sent === 1 ? "" : "s"}
-          {testResult.deleted ? ` · cleaned up ${testResult.deleted} dead subscription(s)` : ""}.
-        </p>
-      )}
       {error && <p className="text-destructive text-sm">{error}</p>}
     </div>
   );

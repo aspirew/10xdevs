@@ -90,18 +90,6 @@ export async function unsubscribeCurrentUser(): Promise<PushResult> {
   }
 }
 
-export async function sendTestPush(): Promise<{ sent: number; failed?: number; deleted?: number; error?: string }> {
-  const response = await fetch("/api/push/test", { method: "POST" });
-  const body = (await response.json().catch(() => ({}))) as {
-    sent?: number;
-    failed?: number;
-    deleted?: number;
-    error?: string;
-  };
-  if (!response.ok) return { sent: 0, error: body.error ?? `HTTP ${String(response.status)}` };
-  return { sent: body.sent ?? 0, failed: body.failed, deleted: body.deleted };
-}
-
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
