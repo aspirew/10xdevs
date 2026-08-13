@@ -62,12 +62,18 @@ if (!admin) {
 // Member emails come from auth.users — anon role has no access; the admin client's
 // .auth.admin namespace IS the canonical way to read auth user records. Scoped to
 // only the user_ids of this group.
-let members: { id: string; email: string | null }[] = [];
+let members: { id: string; email: string | null; full_name: string | null }[] = [];
 if (group && admin && memberIds.length > 0) {
   const fetched = await Promise.all(
     memberIds.map(async (uid) => {
       const { data: userRecord } = await admin.auth.admin.getUserById(uid);
-      return { id: uid, email: userRecord.user?.email ?? null };
+      const metadata = userRecord.user?.user_metadata as { full_name?: string } | undefined;
+      const fullName = metadata?.full_name;
+      return {
+        id: uid,
+        email: userRecord.user?.email ?? null,
+        full_name: typeof fullName === "string" && fullName.length > 0 ? fullName : null,
+      };
     }),
   );
   members = fetched;
@@ -198,7 +204,8 @@ const nextSession: SessionWithHost | null = upcomingSessions.length > 0 ? upcomi
               <ul class="space-y-1 text-sm text-amber-100/80">
                 {members.map((m) => (
                   <li class:list={m.id === user.id ? "font-semibold text-amber-50" : ""}>
-                    {m.email ?? m.id}
+                    <span>{m.full_name ?? m.email ?? m.id}</span>
+                    {m.full_name && m.email && <span class="ml-1 text-amber-100/50">({m.email})</span>}
                     {m.id === user.id && <span class="ml-2 text-xs text-amber-100/50">(you)</span>}
                     {m.id === group.created_by && <span class="ml-2 text-xs text-amber-300">creator</span>}
                   </li>

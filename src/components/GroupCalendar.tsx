@@ -4,8 +4,8 @@ import { addDays, formatDate, parseDate, isPastSlot, WINDOW_DAYS } from "@/lib/c
 import { ConfirmSessionDialog } from "@/components/ConfirmSessionDialog";
 import { CancelSessionDialog } from "@/components/CancelSessionDialog";
 
-// React is imported to mirror SignInForm.tsx — under `jsx: "react-jsx"` + Astro 6 + Vite,
-// omitting it can cause `jsxDEV is not a function` during dev hydration when the JSX
+// React is imported explicitly — under `jsx: "react-jsx"` + Astro 6 + Vite, omitting
+// it can cause `jsxDEV is not a function` during dev hydration when the JSX
 // dev-runtime resolution loses its grip after a build→dev switch.
 void React;
 

@@ -1,5 +1,10 @@
 ---
 import Topbar from "@/components/Topbar.astro";
+
+const { user } = Astro.locals;
+const rawFullName = user?.user_metadata.full_name as string | undefined;
+const emailPrefix = user?.email?.split("@")[0];
+const displayName = user ? (rawFullName ?? emailPrefix ?? "there") : null;
 ---
 
 <div class="bg-tavern relative min-h-screen w-full overflow-hidden">
@@ -31,21 +36,38 @@ import Topbar from "@/components/Topbar.astro";
     <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32 lg:py-40">
       <h1 class="sr-only">GameSlot</h1>
       <img src="/logo-no-background.png" alt="GameSlot" class="mb-6 h-40 w-auto sm:h-48 lg:h-56" />
-      <p class="mb-10 max-w-2xl text-lg text-amber-100/80 sm:text-xl">Never miss a chance to play board games again.</p>
-      <div class="flex flex-col gap-4 sm:flex-row">
-        <a
-          href="/auth/signin"
-          class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-6 py-3 text-base font-medium text-emerald-950 transition-colors hover:bg-amber-400"
-        >
-          Sign in
-        </a>
-        <a
-          href="/auth/signup"
-          class="inline-flex items-center justify-center rounded-lg border border-amber-100/25 px-6 py-3 text-base font-medium text-amber-50 transition-colors hover:bg-amber-100/10"
-        >
-          Sign up
-        </a>
-      </div>
+      {
+        user ? (
+          <>
+            <p class="mb-4 bg-gradient-to-r from-amber-200 via-amber-300 to-orange-200 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
+              Hello {displayName}
+            </p>
+            <p class="mb-10 max-w-2xl text-lg text-amber-100/80 sm:text-xl">Ready to plan your next game night?</p>
+            <div class="flex flex-col gap-4 sm:flex-row">
+              <a
+                href="/groups"
+                class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-6 py-3 text-base font-medium text-emerald-950 transition-colors hover:bg-amber-400"
+              >
+                Go to groups
+              </a>
+            </div>
+          </>
+        ) : (
+          <>
+            <p class="mb-10 max-w-2xl text-lg text-amber-100/80 sm:text-xl">
+              Never miss a chance to play board games again.
+            </p>
+            <div class="flex flex-col gap-4 sm:flex-row">
+              <a
+                href="/auth/signin"
+                class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-6 py-3 text-base font-medium text-emerald-950 transition-colors hover:bg-amber-400"
+              >
+                Sign in
+              </a>
+            </div>
+          </>
+        )
+      }
     </div>
 
     <!-- Feature cards -->

@@ -10,9 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { formatSlotLabel } from "@/lib/calendar";
 
-// React is imported to mirror SignInForm.tsx / GroupCalendar.tsx / ConfirmSessionDialog.tsx —
-// under `jsx: "react-jsx"` + Astro 6 + Vite, omitting it can cause `jsxDEV is not a function`
-// after a build→dev switch.
+// React is imported explicitly — under `jsx: "react-jsx"` + Astro 6 + Vite,
+// omitting it can cause `jsxDEV is not a function` after a build→dev switch.
 void React;
 
 interface CancelTarget {
