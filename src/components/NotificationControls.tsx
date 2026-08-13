@@ -60,7 +60,7 @@ export function NotificationControls({ isSignedIn }: Props) {
   if (!isSignedIn && status !== "subscribed") {
     return (
       <p className="text-sm">
-        <a href="/auth/signin?next=/install" className="underline">
+        <a href="/auth/signin?next=/settings" className="underline">
           Sign in
         </a>{" "}
         to enable notifications.
