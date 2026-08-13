@@ -138,20 +138,20 @@ Update NotificationControls to (a) render the Unsubscribe button with a visible 
 
 #### Automated
 
-- [x] 1.1 `npm run typecheck` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` succeeds
-- [x] 1.4 `grep -rn "sendTestPush" src/` returns zero hits
-- [x] 1.5 `grep -rn "\"/api/push/test\"" src/` returns zero hits
-- [x] 1.6 `ls src/pages/api/push/` does not include `test.ts`
+- [x] 1.1 `npm run typecheck` passes — af86bc8
+- [x] 1.2 `npm run lint` passes — af86bc8
+- [x] 1.3 `npm run build` succeeds — af86bc8
+- [x] 1.4 `grep -rn "sendTestPush" src/` returns zero hits — af86bc8
+- [x] 1.5 `grep -rn "\"/api/push/test\"" src/` returns zero hits — af86bc8
+- [x] 1.6 `ls src/pages/api/push/` does not include `test.ts` — af86bc8
 
 #### Manual
 
-- [x] 1.7 `/install` subscribed state renders exactly one button, "Unsubscribe this device", with visible amber-tinted chrome
-- [x] 1.8 Hovering the button intensifies the amber tint
-- [x] 1.9 No "Send test notification" button appears in any status branch
-- [x] 1.10 Click Unsubscribe → transitions to "Enable notifications" state; no test-result paragraph appears
-- [x] 1.11 "Enable notifications" re-subscribe path still works (S-03 regression check)
-- [x] 1.12 iOS PWA + Android PWA both show the visible unsubscribe button correctly
-- [x] 1.13 No console errors on `/install` load or button click
-- [x] 1.14 Tag production deploy as `prod-<date>-fix-notification-controls` after production smoke passes
+- [x] 1.7 `/install` subscribed state renders exactly one button, "Unsubscribe this device", with visible amber-tinted chrome — af86bc8
+- [x] 1.8 Hovering the button intensifies the amber tint — af86bc8
+- [x] 1.9 No "Send test notification" button appears in any status branch — af86bc8
+- [x] 1.10 Click Unsubscribe → transitions to "Enable notifications" state; no test-result paragraph appears — af86bc8
+- [x] 1.11 "Enable notifications" re-subscribe path still works (S-03 regression check) — af86bc8
+- [x] 1.12 iOS PWA + Android PWA both show the visible unsubscribe button correctly — af86bc8
+- [x] 1.13 No console errors on `/install` load or button click — af86bc8
+- [x] 1.14 Tag production deploy as `prod-<date>-fix-notification-controls` after production smoke passes — af86bc8
